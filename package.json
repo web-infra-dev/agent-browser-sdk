@@ -1,0 +1,39 @@
+{
+  "name": "@agent-infra/browser-monorepo",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+"license": "ISC",
+  "devDependencies": {
+    "@changesets/cli": "2.29.5",
+    "@commitlint/cli": "19.8.1",
+    "@commitlint/config-conventional": "19.8.1",
+    "@trivago/prettier-plugin-sort-imports": "5.2.2",
+    "@types/node": "24.0.15",
+    "@typescript-eslint/eslint-plugin": "8.37.0",
+    "@typescript-eslint/parser": "8.37.0",
+    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/coverage-istanbul": "3.2.4",
+    "cross-env": "7.0.3",
+    "eslint": "9.31.0",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-react": "7.37.5",
+    "husky": "9.1.7",
+    "lint-staged": "16.1.2",
+    "prettier": "3.6.2",
+    "rimraf": "6.0.1",
+    "ts-node": "10.9.2",
+    "tsx": "4.20.3",
+    "typescript": "5.8.3"
+  },
+  "engines": {
+    "node": ">=20.x"
+  }
+}
