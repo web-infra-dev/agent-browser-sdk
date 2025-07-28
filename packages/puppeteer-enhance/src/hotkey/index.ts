@@ -19,13 +19,13 @@ export class Hotkey {
   /**
    * Format the hotkey string into an array of KeyInput.
    *
-   * - example1: 'ctrl+c' -> ['Control', 'KeyC']
-   * - example2: 'control+c' -> ['Control', 'KeyC']
-   * - example3: 'Control+C' -> ['Control', 'KeyC']
+   * - example1: 'ctrl+c' -> ['Control', 'C']
+   * - example2: 'control+c' -> ['Control', 'C']
+   * - example3: 'Control+C' -> ['Control', 'C']
    */
   #formatHotkey(hotkey: string): KeyInput[] {
     const lowerCaseHotkey = hotkey.toLowerCase();
-    const keys = lowerCaseHotkey.split(/[\s+]/);
+    const keys = lowerCaseHotkey.split(/[\s+]+/);
 
     console.log('lowerCase keys', keys);
 

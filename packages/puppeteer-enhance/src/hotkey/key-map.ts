@@ -13,7 +13,18 @@ import type { KeyInput } from 'puppeteer-core';
  * - CDP: https://chromedevtools.github.io/devtools-protocol/tot/Input/#method-dispatchKeyEvent
  * - Commands: https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/editing/commands/editor_command_names.h
  */
-export const MAC_SYSTEM_HOTKEY_MAP = new Map<string, { key: KeyInput; commands: string }>([
+export const MAC_SYSTEM_HOTKEY_MAP = new Map<
+  string,
+  { key: KeyInput; commands: string }
+>([
+  ['CorM+A', { key: 'KeyA', commands: 'SelectAll' }],
+  ['CorM+X', { key: 'KeyX', commands: 'Cut' }],
+  ['CorM+C', { key: 'KeyC', commands: 'Copy' }],
+  ['CorM+V', { key: 'KeyV', commands: 'Paste' }],
+  ['CorM+Z', { key: 'KeyZ', commands: 'Undo' }],
+  ['CorM+Y', { key: 'KeyY', commands: 'Redo' }],
+  ['CorM+Shift+Z', { key: 'KeyZ', commands: 'Redo' }],
+  ['Shift+CorM+Z', { key: 'KeyZ', commands: 'Redo' }],
   ['CorM+KeyA', { key: 'KeyA', commands: 'SelectAll' }],
   ['CorM+KeyX', { key: 'KeyX', commands: 'Cut' }],
   ['CorM+KeyC', { key: 'KeyC', commands: 'Copy' }],
