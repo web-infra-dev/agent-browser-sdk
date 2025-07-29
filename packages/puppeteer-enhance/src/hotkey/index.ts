@@ -2,7 +2,7 @@ import delay from 'delay';
 import { MAC_SYSTEM_HOTKEY_MAP, KEY_ABBR_TO_STANDARD_MAP, KEY_LOW_TO_STANDARD_MAP } from './key-map';
 
 import type { Page, KeyInput } from "puppeteer-core";
-import type { OSType, BrowserType } from '../utils/os';
+import type { OSType, BrowserType } from '../utils';
 
 export interface HotkeyOptions {
   delay: number;

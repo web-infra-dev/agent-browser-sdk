@@ -24,7 +24,7 @@
     "test:watch": "vitest",
     "test:e2e": "vitest --config vitest.e2e.config.ts",
     "coverage": "vitest run --coverage",
-    "test:e2e:local": "vitest --config vitest.e2e.config.ts local-browser.e2e.test.ts"
+    "example:hotkey": "tsx example/hotkey.ts"
   },
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2",
