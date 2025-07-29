@@ -1,4 +1,4 @@
-export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Android' | 'iOS' | 'Unknown';
+export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
 
 export type BrowserType = 'chrome' | 'edge' | 'firefox' | 'Unknown';
 
@@ -54,10 +54,6 @@ export function detectOS(): OSInfo {
       platform = 'macOS';
     } else if (ua.includes('linux') && !ua.includes('android')) {
       platform = 'Linux';
-    } else if (ua.includes('android')) {
-      platform = 'Android';
-    } else if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
-      platform = 'iOS';
     }
   }
 
