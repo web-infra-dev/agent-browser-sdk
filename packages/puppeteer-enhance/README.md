@@ -20,7 +20,7 @@ const browser = await puppeteer.launch();
 const page = await browser.newPage();
 
 // Initialize hotkey handler
-const hotkey = new Hotkey('macOS', 'chrome');
+const hotkey = new Hotkey({ osName: 'macOS', browserName: 'chrome' });
 
 // Simulate Ctrl+C (Copy)
 await hotkey.press(page, 'ctrl+c');
@@ -42,7 +42,10 @@ await hotkey.press(page, 'ctrl+a', { delay: 200 });
 export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
 export type BrowserType = 'chrome' | 'edge' | 'firefox' | 'Unknown';
 
-new Hotkey(osName: OSType, browserName: BrowserType)
+new Hotkey(
+  envInfo: { osName: OSType; browserName: BrowserType },
+  logger?: Logger
+)
 ```
 
 #### Methods
