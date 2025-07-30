@@ -7,7 +7,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   test: {
-    include: ['src/**/*.{test,spec}.ts'],
+    include: ['test/**/*.{test,spec}.ts'],
     testTimeout: 30000, // Increased from default
     hookTimeout: 30000, // Increased from default
     globals: true,
