@@ -1,6 +1,17 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { describe, it, expect, beforeAll, vi, beforeEach, afterEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  beforeEach,
+  afterEach,
+} from 'vitest';
 import { Base64ImageTool } from '../src';
 
 interface TestImageData {
@@ -20,23 +31,25 @@ describe('Base64ImageTool', () => {
     const imageFiles = [
       'logo_240_223.png',
       'logo_240_223.jpeg',
-      'logo_240_223.webp',
+      'VP8_240_223.webp',
+      'VP8X_240_223.webp',
+      'VP8L_240_223.webp',
       'logo_240_223.gif',
       'logo_240_223.bmp',
     ];
     const imagesDir = join(__dirname, 'images');
 
-    testImages = imageFiles.map(filename => {
+    testImages = imageFiles.map((filename) => {
       const filePath = join(imagesDir, filename);
       const buffer = readFileSync(filePath);
       const base64 = buffer.toString('base64');
       const extension = filename.split('.').pop()!;
-      
+
       // Parse dimensions from filename: logo_{width}_{height}.{extension}
       const nameParts = filename.split('_');
       const expectedWidth = parseInt(nameParts[1], 10);
       const expectedHeight = parseInt(nameParts[2].split('.')[0], 10);
-      
+
       return {
         name: filename,
         extension,
@@ -70,10 +83,10 @@ describe('Base64ImageTool', () => {
       testImages.forEach(({ base64, name }) => {
         const tool = new Base64ImageTool(base64);
         const buffer = tool.getBuffer();
-        
+
         expect(buffer).toBeInstanceOf(Uint8Array);
         expect(buffer.length).toBeGreaterThan(0);
-        
+
         // Verify buffer content matches original
         const originalBuffer = Buffer.from(base64, 'base64');
         expect(Array.from(buffer)).toEqual(Array.from(originalBuffer));
@@ -84,7 +97,7 @@ describe('Base64ImageTool', () => {
       const tool = new Base64ImageTool(testImages[0].base64);
       const buffer1 = tool.getBuffer();
       const buffer2 = tool.getBuffer();
-      
+
       expect(buffer1).toStrictEqual(buffer2);
     });
 
@@ -95,10 +108,10 @@ describe('Base64ImageTool', () => {
       beforeEach(() => {
         originalBuffer = globalThis.Buffer;
         originalAtob = globalThis.atob;
-        
+
         // @ts-ignore
         delete globalThis.Buffer;
-        
+
         if (!globalThis.atob) {
           globalThis.atob = (base64: string) => {
             return Buffer.from(base64, 'base64').toString('binary');
@@ -122,10 +135,10 @@ describe('Base64ImageTool', () => {
         testImages.forEach(({ base64, name }) => {
           const tool = new Base64ImageTool(base64);
           const buffer = tool.getBuffer();
-          
+
           expect(buffer).toBeInstanceOf(Uint8Array);
           expect(buffer.length).toBeGreaterThan(0);
-          
+
           const expectedBuffer = originalBuffer.from(base64, 'base64');
           expect(Array.from(buffer)).toEqual(Array.from(expectedBuffer));
         });
@@ -134,7 +147,7 @@ describe('Base64ImageTool', () => {
       it('should handle empty base64 in browser environment', () => {
         const tool = new Base64ImageTool('');
         const buffer = tool.getBuffer();
-        
+
         expect(buffer).toBeInstanceOf(Uint8Array);
         expect(buffer.length).toBe(0);
       });
@@ -143,7 +156,7 @@ describe('Base64ImageTool', () => {
         const tool = new Base64ImageTool(testImages[0].base64);
         const buffer1 = tool.getBuffer();
         const buffer2 = tool.getBuffer();
-        
+
         expect(buffer1).toStrictEqual(buffer2);
       });
     });
@@ -154,7 +167,7 @@ describe('Base64ImageTool', () => {
       testImages.forEach(({ base64, expectedType, name }) => {
         const tool = new Base64ImageTool(base64);
         const detectedType = tool.getImageType();
-        
+
         expect(detectedType).toBe(expectedType);
       });
     });
@@ -168,25 +181,27 @@ describe('Base64ImageTool', () => {
       const tool = new Base64ImageTool(testImages[0].base64);
       const type1 = tool.getImageType();
       const type2 = tool.getImageType();
-      
+
       expect(type1).toBe(type2);
     });
   });
 
   describe('getDimensions()', () => {
     it('should parse dimensions for all supported formats', () => {
-      testImages.forEach(({ base64, expectedType, name, expectedWidth, expectedHeight }) => {
-        const tool = new Base64ImageTool(base64);
-        const dimensions = tool.getDimensions();
-        
-        expect(dimensions).not.toBeNull();
-        expect(dimensions!.width).toBeGreaterThan(0);
-        expect(dimensions!.height).toBeGreaterThan(0);
-        
-        // Verify actual dimensions match expected dimensions
-        expect(dimensions!.width).toBe(expectedWidth);
-        expect(dimensions!.height).toBe(expectedHeight);
-      });
+      testImages.forEach(
+        ({ base64, expectedType, name, expectedWidth, expectedHeight }) => {
+          const tool = new Base64ImageTool(base64);
+          const dimensions = tool.getDimensions();
+
+          expect(dimensions).not.toBeNull();
+          expect(dimensions!.width).toBeGreaterThan(0);
+          expect(dimensions!.height).toBeGreaterThan(0);
+
+          // Verify actual dimensions match expected dimensions
+          expect(dimensions!.width).toBe(expectedWidth);
+          expect(dimensions!.height).toBe(expectedHeight);
+        },
+      );
     });
 
     it('should return null for invalid image data', () => {
@@ -198,7 +213,7 @@ describe('Base64ImageTool', () => {
       const tool = new Base64ImageTool(testImages[0].base64);
       const dimensions1 = tool.getDimensions();
       const dimensions2 = tool.getDimensions();
-      
+
       expect(dimensions1).toBe(dimensions2);
     });
   });
@@ -207,7 +222,7 @@ describe('Base64ImageTool', () => {
     it('should generate correct data URI', () => {
       testImages.forEach(({ base64, expectedType, dataUri }) => {
         const tool = new Base64ImageTool(base64);
-        
+
         const generatedDataUri = tool.getDataUri();
         expect(generatedDataUri).toBe(dataUri);
       });
@@ -242,25 +257,27 @@ describe('Base64ImageTool', () => {
 
   describe('integration tests', () => {
     it('should work with complete workflow', () => {
-      testImages.forEach(({ base64, expectedType, name, expectedWidth, expectedHeight }) => {
-        const tool = new Base64ImageTool(base64);
-        
-        // Get all information
-        const pureBase64 = tool.getPureBase64Image();
-        const buffer = tool.getBuffer();
-        const imageType = tool.getImageType();
-        const dimensions = tool.getDimensions();
-        const dataUri = tool.getDataUri();
-        
-        // Verify all results
-        expect(pureBase64).toBe(base64);
-        expect(buffer).toBeInstanceOf(Uint8Array);
-        expect(imageType).toBe(expectedType);
-        expect(dimensions).not.toBeNull();
-        expect(dimensions!.width).toBe(expectedWidth);
-        expect(dimensions!.height).toBe(expectedHeight);
-        expect(dataUri).toContain(`data:image/${expectedType};base64,`);
-      });
+      testImages.forEach(
+        ({ base64, expectedType, name, expectedWidth, expectedHeight }) => {
+          const tool = new Base64ImageTool(base64);
+
+          // Get all information
+          const pureBase64 = tool.getPureBase64Image();
+          const buffer = tool.getBuffer();
+          const imageType = tool.getImageType();
+          const dimensions = tool.getDimensions();
+          const dataUri = tool.getDataUri();
+
+          // Verify all results
+          expect(pureBase64).toBe(base64);
+          expect(buffer).toBeInstanceOf(Uint8Array);
+          expect(imageType).toBe(expectedType);
+          expect(dimensions).not.toBeNull();
+          expect(dimensions!.width).toBe(expectedWidth);
+          expect(dimensions!.height).toBe(expectedHeight);
+          expect(dataUri).toContain(`data:image/${expectedType};base64,`);
+        },
+      );
     });
   });
 });
