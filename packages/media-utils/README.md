@@ -21,6 +21,10 @@ npm install @agent-infra/media-utils
 > [!NOTE]
 > Currently only supports parsing **static** base64 image formats: PNG, JPEG, WebP, GIF, and BMP
 
+### Platform Compatibility
+
+Supports both Node.js and browsers.
+
 ### Basic Usage
 
 ```typescript
