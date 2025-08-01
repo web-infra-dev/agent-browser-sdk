@@ -7,7 +7,7 @@ import imageminPngquant from 'imagemin-pngquant';
 import imageminMozjpeg from 'imagemin-mozjpeg';
 import imageminWebp from 'imagemin-webp';
 
-import { ImageCompressionOptions, CompressionResult } from './type';
+import { ImageCompressionOptions } from './type';
 
 /**
  * High-performance image compression utility class
