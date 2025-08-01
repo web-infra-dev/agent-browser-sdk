@@ -12,6 +12,8 @@ export interface ImageDimensions {
 export interface ImageCompressionOptions {
   quality: number; // Compression quality (1-100)
   format?: 'jpeg' | 'png' | 'webp';
+  width?: number; // Optional target width
+  height?: number; // Optional target height
 }
 
 export interface CompressionResult {

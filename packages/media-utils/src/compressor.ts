@@ -7,7 +7,7 @@ import imageminPngquant from 'imagemin-pngquant';
 import imageminMozjpeg from 'imagemin-mozjpeg';
 import imageminWebp from 'imagemin-webp';
 
-import { ImageCompressionOptions } from './type';
+import { ImageCompressionOptions, CompressionResult } from './type';
 
 /**
  * High-performance image compression utility class
@@ -20,6 +20,8 @@ export class ImageCompressor {
     this.options = {
       quality: options?.quality ?? 80,
       format: options?.format ?? 'webp',
+      width: options?.width,
+      height: options?.height,
     };
   }
 
@@ -63,6 +65,8 @@ export class ImageCompressor {
    * Get formatted description of current compression options
    */
   getOptionsDescription(): string {
-    return `Quality: ${this.options.quality}, Format: ${this.options.format}`;
+    return `Quality: ${this.options.quality}, Format: ${this.options.format}${
+      this.options.width ? `, Width: ${this.options.width}px` : ''
+    }${this.options.height ? `, Height: ${this.options.height}px` : ''}`;
   }
 }
