@@ -11,6 +11,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./base64": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/base64/index.mjs",
+      "require": "./dist/base64/index.js"
+    },
+    "./compressor": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/compressor.mjs",
+      "require": "./dist/compressor.js"
     }
   },
   "files": [
