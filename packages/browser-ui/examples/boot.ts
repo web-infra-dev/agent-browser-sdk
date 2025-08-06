@@ -16,6 +16,8 @@ async function main() {
       '--remote-debugging-port=9222',
       '--remote-debugging-address=0.0.0.0',
       '--disable-web-security', // disable cdp CORS
+      '--remote-allow-origins=*',
+      'https://www.baidu.com',
     ],
   });
 
@@ -23,9 +25,6 @@ async function main() {
 
   console.log('✅ launched successfully!');
   console.log('📡 CDP WebSocket:', wsEndpoint);
-
-  const page = await browser.newPage();
-  await page.goto('https://www.baidu.com');
 
   console.log('🔄 Ctrl+C to exit...');
 

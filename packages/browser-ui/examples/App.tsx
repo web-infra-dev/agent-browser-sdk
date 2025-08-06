@@ -1,10 +1,10 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 import {
   BrowserCanvas,
   BrowserCanvasRef,
   Browser,
   Page,
-} from "../src/react/BrowserCanvas";
+} from '../src/react/BrowserCanvas';
 
 const App = () => {
   const ref = useRef<BrowserCanvasRef>(null);
@@ -13,7 +13,7 @@ const App = () => {
     const { page } = ctx;
     console.log('url', page.url());
 
-    page.on("framenavigated", async (frame) => {
+    page.on('framenavigated', async (frame) => {
       if (frame === page.mainFrame()) {
         console.log('url', frame.url());
       }
@@ -21,25 +21,22 @@ const App = () => {
   };
 
   return (
-    <div>
-      <div
-        style={{
-          width: '100%',
-          height: '1000px',
-          position: 'relative',
-          zIndex: 1,
+    <div
+      style={{
+        width: '100%',
+        height: '1000px',
+        position: 'relative',
+        zIndex: 1,
+      }}
+    >
+      <BrowserCanvas
+        ref={ref}
+        wsEndpoint="ws://127.0.0.1:9222/devtools/browser/60627d71-6d63-44f6-9004-9f6640feb8cd"
+        onReady={handlePageReady}
+        onError={(err) => {
+          console.error('BrowserCanvas Err', err);
         }}
-      >
-        <BrowserCanvas
-          ref={ref}
-          // cdpEndpoint="http://127.0.0.1:9222/json/version"
-          wsEndpoint="ws://127.0.0.1:9222/devtools/browser/d5e4a62d-17b3-4281-bb2e-1406ac8fa8ca"
-          onReady={handlePageReady}
-          onError={(err) => {
-            console.error('BrowserCanvas Err', err);
-          }}
-        />
-      </div>
+      />
     </div>
   );
 };
