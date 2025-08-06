@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/browser-ui",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "exports": {
     "./react": {
       "types": "./dist/react/index.d.ts",
