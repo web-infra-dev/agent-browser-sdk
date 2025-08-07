@@ -15,6 +15,10 @@
     "dist",
     "assets"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:agent-infra/browser.git"
+  },
   "publishConfig": {
     "access": "public"
   },

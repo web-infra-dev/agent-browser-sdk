@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:agent-infra/browser-ui.git"
+    "url": "git@github.com:agent-infra/browser.git"
   },
   "files": [
     "dist"
