@@ -9,32 +9,38 @@ import type { Browser } from 'puppeteer-core/lib/esm/puppeteer/api/Browser.js';
 export class CanvasBrowser {
   #element: HTMLCanvasElement;
   #wsEndpoint: string;
+  #pptrBrowser: Browser;
 
-  #pptrBrowser: Browser | undefined = undefined;
-
-  constructor(
+  static async create(
     element: HTMLCanvasElement,
+    options: {
+      wsEndpoint: string;
+    },
+  ): Promise<CanvasBrowser> {
+    const pptrBrowser = await connect({
+      browserWSEndpoint: options.wsEndpoint,
+    });
+
+    if (!pptrBrowser) {
+      throw new Error('Failed to connect to Puppeteer browser');
+    }
+
+    const version = await pptrBrowser.version();
+    console.log(`Connected to Puppeteer browser version: ${version}`);
+
+    return new CanvasBrowser(element, pptrBrowser, options);
+  }
+
+  private constructor(
+    element: HTMLCanvasElement,
+    pptrBrowser: Browser,
     options: {
       wsEndpoint: string;
     },
   ) {
     this.#element = element;
+    this.#pptrBrowser = pptrBrowser;
     this.#wsEndpoint = options.wsEndpoint;
-
-    this.init();
-  }
-
-  async init() {
-    this.#pptrBrowser = await connect({
-      browserWSEndpoint: this.#wsEndpoint,
-    });
-
-    if (!this.#pptrBrowser) {
-      throw new Error('Failed to connect to Puppeteer browser');
-    }
-
-    const vesrion = await this.#pptrBrowser.version();
-    console.log(`Connected to Puppeteer browser version: ${vesrion}`);
   }
 
   async destroy() {
