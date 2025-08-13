@@ -1,9 +1,9 @@
-import type { Protocol, Page, Dialog } from "puppeteer-core";
+import type { PuppeteerLifeCycleEvent, Protocol, Page, Dialog } from "puppeteer-core";
 import { EventEmitter } from "events";
 
 export class Tab extends EventEmitter {
   #page: Page;
-  #dialogs: Dialog[] = [];
+  #dialog: Dialog | null = null;
 
   constructor(page: Page) {
     super();
@@ -44,28 +44,38 @@ export class Tab extends EventEmitter {
     }
   }
 
-  async goBack(): Promise<void> {
-    await this.#page.goBack({ waitUntil: [] });
+  async active() {
+    await this.#page.bringToFront();
   }
 
-  async goForward(): Promise<void> {
-    await this.#page.goForward({ waitUntil: [] });
+  async goBack(waitUntil: PuppeteerLifeCycleEvent[] = []): Promise<boolean> {
+    if (this.#dialog) {
+      return false;
+    }
+
+    await this.#page.goBack({ waitUntil: waitUntil });
+    return true;
   }
 
-  async reload(): Promise<void> {
-    await this.#page.reload({ waitUntil: [] });
+  async goForward(waitUntil: PuppeteerLifeCycleEvent[] = []): Promise<boolean> {
+    if (this.#dialog) {
+      return false;
+    }
+
+    await this.#page.goForward({ waitUntil: waitUntil });
+    return true;
+  }
+
+  async reload(waitUntil: PuppeteerLifeCycleEvent[] = []): Promise<void> {
+    await this.#page.reload({ waitUntil: waitUntil });
   }
 
   async close() {
     await this.#page.close();
   }
 
-  getDialogCount() {
-    return this.#dialogs.length;
-  }
-
   async onDialog(dialog: Dialog) {
-    this.#dialogs.push(dialog);
+    this.#dialog = dialog;
 
     this.emit('dialog', {
       type: dialog.type,
@@ -73,11 +83,11 @@ export class Tab extends EventEmitter {
       defaultValue: dialog.defaultValue,
       accept: async (promptText?: string) => {
         await dialog.accept(promptText);
-        this.#dialogs.shift();
+        this.#dialog = null;
       },
       dismiss: async () => {
         await dialog.dismiss();
-        this.#dialogs.shift();
+        this.#dialog = null;
       },
     });
   }
