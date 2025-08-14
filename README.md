@@ -32,6 +32,84 @@ This toolkit is specifically designed for:
 └─────────────────┴─────────────────┴─────────────────────────┘
 ```
 
+```mermaid
+graph TD
+    A[Package A] --> B[Package B]
+    A --> C[Package C]
+    B --> D[Shared Utility]
+    C --> D
+```
+
+
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        UI[UI Components]
+        STATE[State Management]
+    end
+    
+    subgraph "Core Layer" 
+        API[API Client]
+        AUTH[Authentication]
+        UTILS[Utilities]
+    end
+    
+    subgraph "Infrastructure"
+        HTTP[HTTP Client]
+        STORAGE[Storage]
+        LOGGER[Logger]
+    end
+    
+    UI --> STATE
+    UI --> API
+    STATE --> API
+    API --> AUTH
+    API --> HTTP
+    AUTH --> STORAGE
+    UTILS --> LOGGER
+    
+    classDef frontend fill:#e1f5fe
+    classDef core fill:#f3e5f5  
+    classDef infra fill:#e8f5e8
+    
+    class UI,STATE frontend
+    class API,AUTH,UTILS core
+    class HTTP,STORAGE,LOGGER infra
+```
+
+
+```mermaid
+graph TB
+    subgraph "Browser Context Package"
+        EXT[extractContent]
+        DEF[extractWithDefuddle]
+        READ[extractWithReadability] 
+        MD[toMarkdown]
+    end
+    
+    subgraph "External Dependencies"
+        DEFUDDLE[@mozilla/defuddle]
+        READABILITY[@mozilla/readability]
+        TURNDOWN[turndown]
+        PUPPETEER[puppeteer]
+    end
+    
+    EXT --> DEF
+    EXT --> READ
+    DEF --> DEFUDDLE
+    READ --> READABILITY
+    MD --> TURNDOWN
+    EXT --> PUPPETEER
+    READ --> PUPPETEER
+    
+    classDef internal fill:#bbdefb
+    classDef external fill:#c8e6c9
+    
+    class EXT,DEF,READ,MD internal
+    class DEFUDDLE,READABILITY,TURNDOWN,PUPPETEER external
+```
+
+
 
 ## Packages Overview
 
