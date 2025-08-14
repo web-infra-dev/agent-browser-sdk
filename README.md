@@ -20,7 +20,7 @@ This toolkit is specifically designed for:
 
 ## Architecture
 
-
+![architecture](./docs/images/architecture.png)
 
 ## Packages Overview
 
