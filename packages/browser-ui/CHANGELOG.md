@@ -1,5 +1,11 @@
 # @agent-infra/browser-ui
 
+## 0.1.6
+
+### Patch Changes
+
+- feat(puppeteer-enhance): hotkey class add down/up methods
+
 ## 0.1.5
 
 ### Patch Changes

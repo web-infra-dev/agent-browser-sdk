@@ -1,5 +1,13 @@
 # @agent-infra/browser
 
+## 0.1.6
+
+### Patch Changes
+
+- feat(puppeteer-enhance): hotkey class add down/up methods
+- Updated dependencies
+  - @agent-infra/browser-finder@0.1.6
+
 ## 0.1.5
 
 ### Patch Changes
