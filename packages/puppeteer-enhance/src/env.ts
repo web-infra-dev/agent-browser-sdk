@@ -20,6 +20,8 @@ export async function getEnvInfo(browser: Browser): Promise<EnvInfo> {
     const systemInfo = await client.send('SystemInfo.getInfo');
     const browserVersion = await browser.version();
 
+    await client.detach();
+
     if (systemInfo.modelName) {
       const modelName = systemInfo.modelName.toLowerCase();
       if (modelName.includes('win') || modelName.includes('surface')) {

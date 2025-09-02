@@ -13,7 +13,7 @@ pnpm install @agent-infra/puppeteer-enhance
 ## Quick Start
 
 ```typescript
-import { Hotkey } from '@agent-infra/puppeteer-enhance/hotkey';
+import { Hotkey } from '@agent-infra/puppeteer-enhance';
 import puppeteer from 'puppeteer-core';
 
 const browser = await puppeteer.launch();
@@ -90,7 +90,7 @@ await hotkey.press(
 
 #### macOS + Chrome Optimization
 
-When running on macOS with Chrome, the library automatically uses Chrome DevTools Protocol (CDP) commands for common system hotkeys: 
+When running on macOS with Chrome, the library automatically uses Chrome DevTools Protocol (CDP) commands for common system hotkeys:
 
 > See the reasoning behind using CDP for simulation [#560](https://github.com/bytedance/UI-TARS-desktop/pull/560)
 
