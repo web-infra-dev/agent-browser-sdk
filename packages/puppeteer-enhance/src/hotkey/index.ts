@@ -122,4 +122,35 @@ export class Hotkey {
       await page.keyboard.up(key);
     }
   }
+
+  async down(
+    page: Page,
+    hotkey: string,
+    options: Readonly<HotkeyOptions> = { delay: 100 },
+  ): Promise<void> {
+    const formattedHotkey = this.formatHotkey(hotkey);
+
+    if (this.osName === 'macOS' && this.browserName === 'Chrome') {
+      const success = await this.macOSCDPHotKey(page, formattedHotkey, options);
+      if (success) {
+        return;
+      }
+    }
+
+    for (const key of formattedHotkey) {
+      await page.keyboard.down(key);
+    }
+  }
+
+  async up(
+    page: Page,
+    hotkey: string,
+    options: Readonly<HotkeyOptions> = { delay: 100 },
+  ): Promise<void> {
+    const formattedHotkey = this.formatHotkey(hotkey);
+
+    for (const key of formattedHotkey.reverse()) {
+      await page.keyboard.up(key);
+    }
+  }
 }
