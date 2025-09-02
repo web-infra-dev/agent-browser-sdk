@@ -3,11 +3,11 @@ import {
   fromEvent,
   tap,
   filter,
-  mergeMap,
+  concatMap,
   takeUntil,
   catchError,
   EMPTY,
-  from,
+  map,
 } from 'rxjs';
 import { EventEmitter } from 'eventemitter3';
 
@@ -21,42 +21,48 @@ import {
 
 import { drawBase64ToCanvas } from '../utils/image';
 
-export interface ScreencastOptions {
+interface ScreenCastOptions {
   format?: 'jpeg' | 'png';
+  /**
+   * Compression quality from range [0..100].
+   */
   quality?: number;
-  maxWidth?: number;
-  maxHeight?: number;
+  /**
+   * screenshot width.
+   */
+  width?: number;
+  /**
+   * screenshot height.
+   */
+  height?: number;
+  /**
+   * Send every n-th frame.
+   */
   everyNthFrame?: number;
-}
-
-export interface ScreencastFrameEvent {
-  tabId: string;
-  canvas: HTMLCanvasElement;
-  metadata: any;
-  timestamp: number;
-}
-
-export interface ScreencastStartedEvent {
-  tabId: string;
-  canvas: HTMLCanvasElement;
-}
-
-export interface ScreencastStoppedEvent {
-  tabId: string;
 }
 
 export class ScreencastRenderer extends EventEmitter {
   #page: Page;
   #tabId: string;
+  #options: Required<ScreenCastOptions>;
   #cdpSession?: CDPSession;
 
   #observable: Observable<void> | null = null;
   #controller = new AbortController();
 
-  constructor(page: any, tabId: string) {
+  constructor(page: Page, tabId: string, options: ScreenCastOptions = {}) {
     super();
     this.#page = page;
     this.#tabId = tabId;
+
+    this.#options = {
+      format: 'jpeg',
+      quality: 80,
+      width: 1280,
+      height: 720,
+      everyNthFrame: 1,
+      ...options,
+    };
   }
 
   async #initCDPSession(): Promise<void> {
@@ -92,8 +98,16 @@ export class ScreencastRenderer extends EventEmitter {
       filter((event) => {
         return event.metadata.timestamp !== undefined;
       }),
-      mergeMap((event) => {
-        return from(this.#renderFrameToCanvas(canvas, event));
+      map((event) => {
+        return event.data;
+      }),
+      concatMap((base64String) => {
+        return drawBase64ToCanvas(
+          canvas,
+          base64String,
+          this.#options.width,
+          this.#options.height,
+        );
       }),
       catchError((error) => {
         console.error('Failed to process screencast frame:', error);
@@ -103,45 +117,16 @@ export class ScreencastRenderer extends EventEmitter {
     );
   }
 
-  async #renderFrameToCanvas(
-    canvas: HTMLCanvasElement,
-    event: Protocol.Page.ScreencastFrameEvent,
-  ): Promise<void> {
-    const { deviceWidth, deviceHeight } = event.metadata;
-
-    return drawBase64ToCanvas(
-      canvas,
-      event.data,
-      0,
-      0,
-      deviceWidth,
-      deviceHeight,
-    );
-  }
-
-  async start(
-    canvas: HTMLCanvasElement,
-    options: ScreencastOptions = {},
-  ): Promise<void> {
-    const {
-      format = 'jpeg',
-      quality = 80,
-      maxWidth = 1200,
-      maxHeight = 800,
-      everyNthFrame = 3,
-    } = options;
-
+  async start(canvas: HTMLCanvasElement): Promise<void> {
     try {
-      // 初始化 CDP 会话
       await this.#initCDPSession();
 
-      // 启动 screencast - 添加宽高限制
       await this.#cdpSession!.send('Page.startScreencast', {
-        format,
-        quality,
-        maxWidth,
-        maxHeight,
-        everyNthFrame,
+        format: this.#options.format,
+        quality: this.#options.quality,
+        maxWidth: this.#options.width,
+        maxHeight: this.#options.height,
+        everyNthFrame: this.#options.everyNthFrame,
       });
 
       this.#observable = this.#createScreencastObservable(canvas);

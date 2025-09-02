@@ -14,16 +14,10 @@ function normalizeBase64ToDataUrl(
 async function createImageBitmapFromBase64(base64: string): Promise<ImageBitmap> {
   const dataUrl = normalizeBase64ToDataUrl(base64);
 
-  try {
-    const response = await fetch(dataUrl);
-    const blob = await response.blob();
-    return await createImageBitmap(blob);
-  } catch (error) {
-    const img = new Image();
-    img.src = dataUrl;
-    await img.decode();
-    return await createImageBitmap(img);
-  }
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+
+  return await createImageBitmap(blob);
 }
 
 function createImageFromBase64Fallback(base64: string): Promise<HTMLImageElement> {
