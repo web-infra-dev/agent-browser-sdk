@@ -54,8 +54,8 @@ export class ScreencastRenderer extends EventEmitter {
   #controller?: AbortController;
 
   constructor(
-    page: Page,
     tabId: string,
+    page: Page,
     canvas: HTMLCanvasElement,
     options: ScreenCastOptions = {},
   ) {

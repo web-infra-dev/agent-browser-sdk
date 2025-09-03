@@ -22,7 +22,7 @@ export class Tab extends EventEmitter {
     this.#page = page;
     this.#status = 'active';
 
-    this.#renderer = new ScreencastRenderer(page, this.#id, canvas);
+    this.#renderer = new ScreencastRenderer(this.#id, page, canvas);
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#page.on('dialog', (dialog: Dialog) => this.onDialog(dialog));
