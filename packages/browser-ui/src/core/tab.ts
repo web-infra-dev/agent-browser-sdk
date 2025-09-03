@@ -1,11 +1,13 @@
 import type { PuppeteerLifeCycleEvent, Protocol, Page, Dialog } from "puppeteer-core";
-import { EventEmitter } from "events";
+import { EventEmitter } from 'eventemitter3';
 import { ScreencastRenderer } from './screencast-renderer';
 
 export class Tab extends EventEmitter {
   #id: string;
   #status: 'active' | 'inactive';
+
   #page: Page;
+  #renderer: ScreencastRenderer;
 
   #favicon = '';
   #url = 'about:blank';
@@ -13,13 +15,14 @@ export class Tab extends EventEmitter {
 
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
-  #renderer: ScreencastRenderer | null = null;
 
-  constructor(page: Page) {
+  constructor(page: Page, canvas: HTMLCanvasElement) {
     super();
     this.#id = Math.random().toString(36).substring(2, 15);
     this.#page = page;
     this.#status = 'active';
+
+    this.#renderer = new ScreencastRenderer(page, this.#id, canvas);
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#page.on('dialog', (dialog: Dialog) => this.onDialog(dialog));
@@ -133,6 +136,35 @@ export class Tab extends EventEmitter {
     });
   }
 
+  async goto(
+    url: string,
+    options?: { waitUntil?: PuppeteerLifeCycleEvent[] },
+  ): Promise<void> {
+    if (this.#dialog) {
+      throw new Error('Cannot navigate while dialog is open');
+    }
+
+    this.#setLoading(true);
+
+    try {
+      await this.#page.setViewport({
+        width: 1280,
+        height: 720,
+      });
+      await this.#page.goto(url, {
+        waitUntil: options?.waitUntil || ['load'],
+      });
+
+      this.#url = url;
+      this.#favicon = ''; // 重置 favicon，让下次获取时重新加载
+
+      this.#setLoading(false);
+    } catch (error) {
+      this.#setLoading(false);
+      throw error;
+    }
+  }
+
   #setLoading(loading: boolean) {
     if (this.#isLoading === loading) {
       return;
@@ -146,24 +178,9 @@ export class Tab extends EventEmitter {
   }
 
   getRenderer(): ScreencastRenderer {
-    if (!this.#renderer) {
-      this.#renderer = new ScreencastRenderer(this.#page, this.#id);
-    }
     return this.#renderer;
   }
 
-  #destroyRenderer(): void {
-    if (this.#renderer) {
-      this.#renderer.removeAllListeners();
-      this.#renderer = null;
-    }
-  }
-
   async destroy(): Promise<void> {
-    // ... 保留现有销毁逻辑 ...
-    
-    this.#destroyRenderer();
-    
-    // ... 保留其他销毁逻辑 ...
   }
 }

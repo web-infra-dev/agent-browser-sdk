@@ -44,16 +44,25 @@ interface ScreenCastOptions {
 export class ScreencastRenderer extends EventEmitter {
   #page: Page;
   #tabId: string;
+  #canvas: HTMLCanvasElement;
   #options: Required<ScreenCastOptions>;
   #cdpSession?: CDPSession;
 
-  #observable: Observable<void> | null = null;
-  #controller = new AbortController();
+  #isRunning: boolean = false;
 
-  constructor(page: Page, tabId: string, options: ScreenCastOptions = {}) {
+  #observable?: Observable<void>;
+  #controller?: AbortController;
+
+  constructor(
+    page: Page,
+    tabId: string,
+    canvas: HTMLCanvasElement,
+    options: ScreenCastOptions = {},
+  ) {
     super();
     this.#page = page;
     this.#tabId = tabId;
+    this.#canvas = canvas;
 
     this.#options = {
       format: 'jpeg',
@@ -71,8 +80,8 @@ export class ScreencastRenderer extends EventEmitter {
     }
   }
 
-  #createScreencastObservable(canvas: HTMLCanvasElement): Observable<void> {
-    if (!canvas.getContext('2d')) {
+  #createScreencastObservable(): Observable<void> {
+    if (!this.#canvas.getContext('2d')) {
       throw new Error('Cannot get 2D context from canvas');
     }
 
@@ -103,7 +112,7 @@ export class ScreencastRenderer extends EventEmitter {
       }),
       concatMap((base64String) => {
         return drawBase64ToCanvas(
-          canvas,
+          this.#canvas,
           base64String,
           this.#options.width,
           this.#options.height,
@@ -113,12 +122,18 @@ export class ScreencastRenderer extends EventEmitter {
         console.error('Failed to process screencast frame:', error);
         return EMPTY;
       }),
-      takeUntil(fromEvent(this.#controller.signal, 'abort')),
+      takeUntil(fromEvent(this.#controller!.signal, 'abort')),
     );
   }
 
-  async start(canvas: HTMLCanvasElement): Promise<void> {
+  async start(): Promise<void> {
+    if (this.#isRunning) {
+      return;
+    }
+
     try {
+      this.#controller = new AbortController();
+
       await this.#initCDPSession();
 
       await this.#cdpSession!.send('Page.startScreencast', {
@@ -129,7 +144,7 @@ export class ScreencastRenderer extends EventEmitter {
         everyNthFrame: this.#options.everyNthFrame,
       });
 
-      this.#observable = this.#createScreencastObservable(canvas);
+      this.#observable = this.#createScreencastObservable();
 
       this.#observable.subscribe({
         next: () => {
@@ -143,27 +158,33 @@ export class ScreencastRenderer extends EventEmitter {
           console.log('Screencast stream completed');
         },
       });
+
+      this.#isRunning = true;
     } catch (error) {
       console.error('Failed to start screencast:', error);
-      this.#observable = null;
+      this.#observable = undefined;
       throw error;
     }
   }
 
   async stop(): Promise<void> {
+    if (!this.#isRunning) {
+      return;
+    }
+
     if (!this.#cdpSession) {
       return;
     }
 
-    if (this.#controller.signal.aborted) {
-      return;
-    }
-
     await this.#cdpSession.send('Page.stopScreencast');
-    this.#controller.abort();
+
+    this.#controller?.abort();
+    this.#observable = undefined;
 
     await this.#cdpSession.detach();
     this.#cdpSession = undefined;
+
+    this.#isRunning = false;
   }
 
   get tabId(): string {
