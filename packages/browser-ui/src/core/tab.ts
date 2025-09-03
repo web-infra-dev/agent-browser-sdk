@@ -73,6 +73,13 @@ export class Tab extends EventEmitter {
     this.#status = 'active';
 
     // TODO: 需要加入 evaluate 代码确保页面真的可见
+
+    this.#renderer.start();
+  }
+
+  async inactive() {
+    this.#status = 'inactive';
+    this.#renderer.stop();
   }
 
   async goBack(waitUntil: PuppeteerLifeCycleEvent[] = []): Promise<boolean> {
@@ -179,8 +186,5 @@ export class Tab extends EventEmitter {
 
   getRenderer(): ScreencastRenderer {
     return this.#renderer;
-  }
-
-  async destroy(): Promise<void> {
   }
 }
