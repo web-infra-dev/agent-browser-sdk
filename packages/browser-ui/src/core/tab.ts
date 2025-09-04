@@ -7,8 +7,25 @@ import type {
 } from 'puppeteer-core';
 import { EventEmitter } from 'eventemitter3';
 import { ScreencastRenderer } from './screencast-renderer';
+import { TabEvents } from '../event/tabs';
 
-export class Tab extends EventEmitter {
+interface TabEventMap {
+  [TabEvents.TabLoadingStateChanged]: {
+    tabId: string;
+    isLoading: boolean;
+  };
+  [TabEvents.TabUrlChanged]: {
+    tabId: string;
+    oldUrl: string;
+    newUrl: string;
+  };
+  [TabEvents.TabPopupCreated]: {
+    tabId: string;
+    newPage: Page;
+  };
+}
+
+export class Tab extends EventEmitter<TabEventMap> {
   #id: string;
   #status: 'active' | 'inactive';
 
@@ -31,8 +48,9 @@ export class Tab extends EventEmitter {
     this.#renderer = new ScreencastRenderer(this.#id, page, canvas);
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
-    this.#page.on('dialog', (dialog: Dialog) => this.onDialog(dialog));
-    this.#page.on('framenavigated', (frame) => this.onFrameNavigated(frame));
+    this.#page.on('dialog', (dialog: Dialog) => this.#onDialog(dialog));
+    this.#page.on('framenavigated', (frame) => this.#onFrameNavigated(frame));
+    this.#page.on('popup', (page) => this.#onPopup(page));
   }
 
   getTabId() {
@@ -132,24 +150,6 @@ export class Tab extends EventEmitter {
     await this.#page.close();
   }
 
-  async onDialog(dialog: Dialog) {
-    this.#dialog = dialog;
-
-    this.emit('dialog', {
-      type: dialog.type,
-      message: dialog.message,
-      defaultValue: dialog.defaultValue,
-      accept: async (promptText?: string) => {
-        await dialog.accept(promptText);
-        this.#dialog = null;
-      },
-      dismiss: async () => {
-        await dialog.dismiss();
-        this.#dialog = null;
-      },
-    });
-  }
-
   async goto(
     url: string,
     options?: { waitUntil?: PuppeteerLifeCycleEvent[] },
@@ -185,13 +185,33 @@ export class Tab extends EventEmitter {
     }
 
     this.#isLoading = loading;
-    this.emit('loadingStateChanged', {
+    this.emit(TabEvents.TabLoadingStateChanged, {
       isLoading: loading,
       tabId: this.#id,
     });
   }
 
-  private async onFrameNavigated(frame: Frame) {
+  async #onDialog(dialog: Dialog) {
+    this.#dialog = dialog;
+
+    // this.emit('dialog', {
+    //   type: dialog.type,
+    //   message: dialog.message,
+    //   defaultValue: dialog.defaultValue,
+    //   accept: async (promptText?: string) => {
+    //     await dialog.accept(promptText);
+    //     this.#dialog = null;
+    //   },
+    //   dismiss: async () => {
+    //     await dialog.dismiss();
+    //     this.#dialog = null;
+    //   },
+    // });
+  }
+
+  async #onFrameNavigated(frame: Frame) {
+    // TODO: 需要考虑一下，如果当前的 主 frame 是其他的网页通过 popup 打开的，
+    // 是不是 frame.parentFrame() 不为空，导致这个逻辑判断出问题？
     if (!frame.parentFrame()) {
       const oldUrl = this.#url;
       const newUrl = frame.url();
@@ -202,13 +222,24 @@ export class Tab extends EventEmitter {
       await this.getTitle();
 
       if (oldUrl !== newUrl) {
-        this.emit('urlChanged', {
+        this.emit(TabEvents.TabUrlChanged, {
           tabId: this.#id,
           oldUrl,
           newUrl,
         });
       }
     }
+  }
+
+  async #onPopup(page: Page | null) {
+    if (!page) {
+      return;
+    }
+
+    this.emit(TabEvents.TabPopupCreated, {
+      tabId: this.#id,
+      newPage: page,
+    });
   }
 
   getRenderer(): ScreencastRenderer {

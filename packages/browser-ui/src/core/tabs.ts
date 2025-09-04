@@ -1,6 +1,7 @@
 import { proxy, subscribe } from 'valtio';
 import { Tab } from './tab';
-import type { Browser } from 'puppeteer-core';
+import type { Browser, Page } from 'puppeteer-core';
+import { TabEvents } from '../event/tabs';
 
 export interface TabMeta {
   id: string;
@@ -53,8 +54,12 @@ export class Tabs {
 
     this.#tabs.set(tabId, tab);
 
-    tab.on('loadingStateChanged', () => {
+    tab.on(TabEvents.TabLoadingStateChanged, () => {
       this.#syncTabMeta(tabId);
+    });
+
+    tab.on(TabEvents.TabPopupCreated, (event) => {
+      this.#handlePopupCreated(event.newPage);
     });
 
     if (!this.state.activeTabId || this.state.tabs.size === 0) {
@@ -210,6 +215,24 @@ export class Tabs {
     };
 
     this.state.tabs.set(tabId, tabMeta);
+  }
+
+  async #handlePopupCreated(newPage: Page): Promise<void> {
+    const tab = new Tab(newPage, this.#canvas);
+    const tabId = tab.getTabId();
+
+    this.#tabs.set(tabId, tab);
+
+    tab.on(TabEvents.TabLoadingStateChanged, () => {
+      this.#syncTabMeta(tabId);
+    });
+
+    tab.on(TabEvents.TabPopupCreated, (event) => {
+      this.#handlePopupCreated(event.newPage);
+    });
+
+    await this.activeTab(tabId);
+    await this.#syncTabMeta(tabId);
   }
 
   async destroy(): Promise<void> {
