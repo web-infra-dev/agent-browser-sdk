@@ -104,16 +104,26 @@ export class Tabs {
       return;
     }
 
-    const tabIds: string[] = [];
+    let activeTabId: string = '';
+    let firstTabId: string = '';
     for (const pptrPage of existingPages) {
       const tabId = await this.#createTab(pptrPage, 'init');
-      tabIds.push(tabId);
+      const tab = this.#tabs.get(tabId)!;
+
+      if (!firstTabId) {
+        firstTabId = tabId;
+      }
+
+      if (await tab.checkActiveStatusWithRuntime()) {
+        activeTabId = tabId;
+      }
     }
 
-    // TODO: 需要加入 evaluate 代码检测真正 active 的逻辑
-    await this.activeTab(tabIds[0]);
+    if (!activeTabId) {
+      activeTabId = firstTabId;
+    }
 
-    return tabIds;
+    await this.activeTab(activeTabId);
   }
 
   async #handleTargetCreated(target: Target) {

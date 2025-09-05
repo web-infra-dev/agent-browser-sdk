@@ -123,6 +123,20 @@ export class Tab extends EventEmitter<TabEventMap> {
     this.#renderer.stop();
   }
 
+  async checkActiveStatusWithRuntime() {
+    try {
+      await this.#pptrPage.waitForFunction(
+        () => document.visibilityState === 'visible',
+        {
+          timeout: 1000,
+        },
+      );
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   async goBack(waitUntil: PuppeteerLifeCycleEvent[] = []): Promise<boolean> {
     if (this.#dialog) {
       return false;
