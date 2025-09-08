@@ -6,21 +6,17 @@ import type {
 } from 'puppeteer-core';
 import { EventEmitter } from 'eventemitter3';
 import { ScreencastRenderer } from './screencast-renderer';
-import { TabEvents } from '../event/tabs';
+import { TabEvents, TabEventsMap } from '../types/tabs';
 
-interface TabEventMap {
-  [TabEvents.TabLoadingStateChanged]: {
-    tabId: string;
-    isLoading: boolean;
-  };
-  [TabEvents.TabUrlChanged]: {
-    tabId: string;
-    oldUrl: string;
-    newUrl: string;
-  };
+declare global {
+  interface Window {
+    __agent_infra_visibility_initialized?: boolean;
+    __agent_infra_visibility_handler?: () => void;
+    __agent_infra_visibility_change?: (isVisible: boolean) => void;
+  }
 }
 
-export class Tab extends EventEmitter<TabEventMap> {
+export class Tab extends EventEmitter<TabEventsMap> {
   #id: string;
   #status: 'active' | 'inactive';
 
@@ -46,9 +42,13 @@ export class Tab extends EventEmitter<TabEventMap> {
 
     this.#renderer = new ScreencastRenderer(this.#id, page, canvas);
 
+    // 设置页面可见性监听
+    this.#setupVisibilityTracking();
+
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#pptrPage.on('dialog', this.#dialogHandler);
     this.#pptrPage.on('load', this.#loadHandler);
+    this.#pptrPage.on('framenavigated', this.#frameNavigatedHandler);
   }
 
   // #region meta info
@@ -117,13 +117,13 @@ export class Tab extends EventEmitter<TabEventMap> {
   #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
 
   #loadHandler = () => {
-    console.log('loadHandler');
-
     this.emit(TabEvents.TabLoadingStateChanged, {
       isLoading: false,
       tabId: this.#id,
     });
-  }
+  };
+
+  #frameNavigatedHandler = (frame: Frame) => this.#onFrameNavigated(frame);
 
   // #endregion
 
@@ -201,31 +201,6 @@ export class Tab extends EventEmitter<TabEventMap> {
     }
   }
 
-  async close() {
-    this.#pptrPage.off('dialog', this.#dialogHandler);
-
-    if (this.#reloadAbortController) {
-      this.#reloadAbortController.abort();
-      this.#reloadAbortController = null;
-    }
-
-    try {
-      await this.#pptrPage.close();
-    } catch (error) {
-      // If the page has already been manually closed
-      // (not controlled by pptr, usually upon receiving the 'targetdestroyed' event),
-      // then it can be ignored directly.
-      if (
-        error instanceof Error &&
-        error.message.includes('No target with given id found')
-      ) {
-        return;
-      }
-
-      throw error;
-    }
-  }
-
   async goto(
     url: string,
     options?: { waitUntil?: PuppeteerLifeCycleEvent[] },
@@ -267,6 +242,33 @@ export class Tab extends EventEmitter<TabEventMap> {
     });
   }
 
+  async close() {
+    this.#pptrPage.off('dialog', this.#dialogHandler);
+    this.#pptrPage.off('load', this.#loadHandler);
+    this.#pptrPage.off('framenavigated', this.#frameNavigatedHandler);
+
+    if (this.#reloadAbortController) {
+      this.#reloadAbortController.abort();
+      this.#reloadAbortController = null;
+    }
+
+    try {
+      await this.#pptrPage.close();
+    } catch (error) {
+      // If the page has already been manually closed
+      // (not controlled by pptr, usually upon receiving the 'targetdestroyed' event),
+      // then it can be ignored directly.
+      if (
+        error instanceof Error &&
+        error.message.includes('No target with given id found')
+      ) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+
   async #onDialog(dialog: Dialog) {
     this.#dialog = dialog;
 
@@ -286,8 +288,7 @@ export class Tab extends EventEmitter<TabEventMap> {
   }
 
   async #onFrameNavigated(frame: Frame) {
-    // TODO: 需要考虑一下，如果当前的 主 frame 是其他的网页通过 popup 打开的，
-    // 是不是 frame.parentFrame() 不为空，导致这个逻辑判断出问题？
+    // 只处理主框架的导航
     if (!frame.parentFrame()) {
       const oldUrl = this.#url;
       const newUrl = frame.url();
@@ -305,6 +306,54 @@ export class Tab extends EventEmitter<TabEventMap> {
       }
     }
   }
+
+  // #region visibility
+
+  async #setupVisibilityTracking() {
+    await this.#pptrPage.exposeFunction(
+      '__agent_infra_visibility_change',
+      (isVisible: boolean) => {
+        this.emit(TabEvents.TabVisibilityChanged, {
+          tabId: this.#id,
+          isVisible,
+        });
+      },
+    );
+
+    const injectedScript = () => {
+      if (window.top !== window) {
+        return;
+      }
+      if (window.__agent_infra_visibility_initialized) {
+        return;
+      }
+
+      const handleVisibilityChange = () => {
+        const isVisible = document.visibilityState === 'visible';
+        if (typeof window.__agent_infra_visibility_change === 'function') {
+          window.__agent_infra_visibility_change(isVisible);
+        }
+      };
+
+      window.__agent_infra_visibility_initialized = true;
+      window.__agent_infra_visibility_handler = handleVisibilityChange;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', handleVisibilityChange);
+      } else {
+        handleVisibilityChange();
+      }
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    };
+
+    try {
+      await this.#pptrPage.evaluateOnNewDocument(injectedScript);
+      await this.#pptrPage.evaluate(injectedScript);
+    } catch (error) {}
+  }
+
+  // #endregion
 
   getRenderer(): ScreencastRenderer {
     return this.#renderer;

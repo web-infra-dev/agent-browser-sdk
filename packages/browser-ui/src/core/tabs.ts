@@ -2,11 +2,15 @@ import { proxy, subscribe } from 'valtio';
 import { proxyMap } from 'valtio/utils';
 import { Tab } from './tab';
 import type { Browser, Page, Target } from 'puppeteer-core';
-import { TabEvents } from '../event/tabs';
 import { Mutex } from '../utils/mutex';
 
-import { TabMeta, TabsState, TabsOperationTracker } from '../types/tabs';
-
+import {
+  TabEvents,
+  TabEventsMap,
+  TabMeta,
+  TabsState,
+  TabsOperationTracker,
+} from '../types/tabs';
 
 export class Tabs {
   #pptrBrowser: Browser;
@@ -35,9 +39,6 @@ export class Tabs {
 
     this.#pptrBrowser.on('targetcreated', (target) =>
       this.#handleTargetCreated(target),
-    );
-    this.#pptrBrowser.on('targetchanged', (target) =>
-      console.log('targetchanged', target),
     );
     this.#pptrBrowser.on('targetdestroyed', (target) =>
       this.#handleTargetDestroyed(target),
@@ -377,6 +378,16 @@ export class Tabs {
     tab.on(TabEvents.TabLoadingStateChanged, () => {
       this.#syncTabMeta(tabId);
     });
+    tab.on(
+      TabEvents.TabVisibilityChanged,
+      (event: TabEventsMap[TabEvents.TabVisibilityChanged]) => {
+        console.log('TabVisibilityChanged', event);
+
+        if (event.isVisible) {
+          this.#activeTab(event.tabId);
+        }
+      },
+    );
   }
 
   // #endregion
