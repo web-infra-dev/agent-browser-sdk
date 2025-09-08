@@ -67,7 +67,7 @@ export class Tabs {
     }
     this.#operations.creatingTargetIds.add(targetId);
 
-    const tab = new Tab(pptrPage, this.#canvas);
+    const tab = new Tab(targetId, pptrPage, this.#canvas);
 
     this.#tabs.set(targetId, tab);
     this.#setupTabEvents(tab, targetId);

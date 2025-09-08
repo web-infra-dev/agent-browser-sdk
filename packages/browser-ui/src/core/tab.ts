@@ -30,12 +30,12 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
 
-  constructor(page: Page, canvas: HTMLCanvasElement) {
+  constructor(id: string, page: Page, canvas: HTMLCanvasElement) {
     super();
     this.#pptrPage = page;
     // CdpTarget has _targetId
     // @ts-ignore
-    this.#id = page.target()._targetId; // tabId is tagetId
+    this.#id = id || page.target()._targetId; // tabId is tagetId
     this.#url = page.url();
 
     this.#status = 'active';
@@ -131,19 +131,11 @@ export class Tab extends EventEmitter<TabEventsMap> {
     await this.#pptrPage.bringToFront();
     this.#status = 'active';
 
-    if (this.#url === 'about:blank' || this.#url.startsWith('chrome://')) {
-      return;
-    }
-
     this.#renderer.start();
   }
 
   async inactive() {
     this.#status = 'inactive';
-
-    if (this.#url === 'about:blank' || this.#url.startsWith('chrome://')) {
-      return '';
-    }
 
     this.#renderer.stop();
   }
