@@ -34,8 +34,6 @@ export class Tab extends EventEmitter<TabEventMap> {
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
 
-  #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
-
   constructor(page: Page, canvas: HTMLCanvasElement) {
     super();
     this.#pptrPage = page;
@@ -50,7 +48,10 @@ export class Tab extends EventEmitter<TabEventMap> {
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#pptrPage.on('dialog', this.#dialogHandler);
+    this.#pptrPage.on('load', this.#loadHandler);
   }
+
+  // #region meta info
 
   get tabId() {
     return this.#id;
@@ -90,7 +91,15 @@ export class Tab extends EventEmitter<TabEventMap> {
         }
 
         // fallback
-        return `${window.location.origin}/favicon.ico`;
+        if (
+          window.location &&
+          window.location.origin &&
+          window.location.origin !== 'null'
+        ) {
+          return `${window.location.origin}/favicon.ico`;
+        }
+
+        return '';
       });
 
       this.#favicon = favicon;
@@ -100,6 +109,23 @@ export class Tab extends EventEmitter<TabEventMap> {
 
     return this.#favicon;
   }
+
+  // #endregion
+
+  // #region events handler
+
+  #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
+
+  #loadHandler = () => {
+    console.log('loadHandler');
+
+    this.emit(TabEvents.TabLoadingStateChanged, {
+      isLoading: false,
+      tabId: this.#id,
+    });
+  }
+
+  // #endregion
 
   async active() {
     await this.#pptrPage.bringToFront();

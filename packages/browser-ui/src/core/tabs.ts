@@ -1,4 +1,5 @@
 import { proxy, subscribe } from 'valtio';
+import { proxyMap } from 'valtio/utils';
 import { Tab } from './tab';
 import type { Browser, Page, Target } from 'puppeteer-core';
 import { TabEvents } from '../event/tabs';
@@ -16,18 +17,17 @@ export class Tabs {
   constructor(browser: Browser, canvas: HTMLCanvasElement) {
     this.#pptrBrowser = browser;
     this.#canvas = canvas;
-    this.#tabs = new Map<string, Tab>();
 
+    this.#tabs = new Map<string, Tab>();
+    this.state = proxy({
+      tabs: proxyMap<string, TabMeta>(),
+      activeTabId: null,
+    });
     this.#operations = {
       creatingTargetIds: new Set<string>(),
       switchingTargetIds: new Set<string>(),
       closingTargetIds: new Set<string>(),
     };
-
-    this.state = proxy({
-      tabs: new Map<string, TabMeta>(),
-      activeTabId: null,
-    });
 
     this.#initializeExistingTabs();
 
@@ -366,12 +366,14 @@ export class Tabs {
       isActive: tabId === this.state.activeTabId,
     };
 
+    console.log('syncTabMeta', tabId, tabMeta);
+
     this.state.tabs.set(tabId, tabMeta);
   }
 
   #setupTabEvents(tab: Tab, tabId: string): void {
-    tab.on(TabEvents.TabLoadingStateChanged, () => {
-      this.#syncTabMeta(tabId);
+    tab.on(TabEvents.TabLoadingStateChanged, async () => {
+      await this.#syncTabMeta(tabId);
     });
   }
 
