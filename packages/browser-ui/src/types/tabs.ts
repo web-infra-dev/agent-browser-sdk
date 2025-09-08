@@ -17,5 +17,5 @@ export interface TabsState {
 export interface TabsOperationTracker {
   creatingTargetIds: Set<string>;
   switchingTargetIds: Set<string>;
-  closingTargets: WeakSet<Target>;
+  closingTargetIds: Set<string>;
 }

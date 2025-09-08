@@ -1,6 +1,6 @@
 import { proxy, subscribe } from 'valtio';
 import { Tab } from './tab';
-import type { Browser, CDPSession, Page, Target } from 'puppeteer-core';
+import type { Browser, Page, Target } from 'puppeteer-core';
 import { TabEvents } from '../event/tabs';
 import { Mutex } from '../utils/mutex';
 
@@ -10,7 +10,6 @@ export class Tabs {
   #tabs: Map<string, Tab>;
   #canvas: HTMLCanvasElement;
   #operations: TabsOperationTracker;
-  #cdpSession: CDPSession | null = null;
 
   public state: TabsState;
 
@@ -22,7 +21,7 @@ export class Tabs {
     this.#operations = {
       creatingTargetIds: new Set<string>(),
       switchingTargetIds: new Set<string>(),
-      closingTargets: new WeakSet<Target>(),
+      closingTargetIds: new Set<string>(),
     };
 
     this.state = proxy({
@@ -38,9 +37,9 @@ export class Tabs {
     this.#pptrBrowser.on('targetchanged', (target) =>
       console.log('targetchanged', target),
     );
-    // this.#pptrBrowser.on('targetdestroyed', (target) =>
-    //   this.#handleTargetEvent('destroyed', target),
-    // );
+    this.#pptrBrowser.on('targetdestroyed', (target) =>
+      this.#handleTargetDestroyed(target),
+    );
   }
 
   subscribe(callback: () => void): () => void {
@@ -225,33 +224,52 @@ export class Tabs {
 
   // #region closeTab
 
-  async closeTab(tabId: string): Promise<boolean> {
+  #closeMutex = new Mutex();
+  async #closeTab(tabId: string): Promise<boolean> {
+    using _ = await this.#closeMutex.acquire();
+
+    // check
+    if (this.#operations.closingTargetIds.has(tabId)) {
+      return false;
+    }
+    this.#operations.closingTargetIds.add(tabId);
+
+    // close tab
     const tab = this.#tabs.get(tabId);
     if (!tab) {
       return false;
     }
+    await tab.close();
+    this.#tabs.delete(tabId);
+    this.state.tabs.delete(tabId);
 
-    const target = tab.target;
-    if (this.#operations.closingTargets.has(target)) {
-      return false;
+    // active page
+    if (this.state.activeTabId === tabId) {
+      this.state.activeTabId = null;
+
+      const lastTabId = Array.from(this.state.tabs.keys()).pop();
+      if (lastTabId) {
+        await this.activeTab(lastTabId);
+      } else {
+        await this.createTab();
+      }
     }
 
-    this.#operations.closingTargets.add(target);
-
-    try {
-      await tab.close();
-      await this.#removeTab(tabId);
-      return true;
-    } finally {
-      this.#operations.closingTargets.delete(target);
-    }
+    return true;
   }
 
-  async #handleTargetDestroyed(target: Target): Promise<void> {
-    const tabId = this.#findTabIdByTarget(target);
-    if (tabId && !this.#operations.closingTargets.has(target)) {
-      await this.#removeTab(tabId);
+  async #handleTargetDestroyed(target: Target) {
+    if (target.type() !== 'page') {
+      return;
     }
+
+    // @ts-ignore
+    const targetId = target._targetId;
+    await this.#closeTab(targetId);
+  }
+
+  async closeTab(tabId: string): Promise<boolean> {
+    return await this.#closeTab(tabId);
   }
 
   // #endregion
@@ -329,71 +347,6 @@ export class Tabs {
   // #endregion
 
   // #region private methods
-
-  async #handleTargetEvent(
-    eventType: 'created' | 'changed' | 'destroyed',
-    target: Target,
-  ): Promise<void> {
-    if (target.type() !== 'page') {
-      return;
-    }
-
-    if (this.#operations.switchingTargetIds.has(target)) {
-      return;
-    }
-
-    this.#operations.switchingTargetIds.add(target);
-
-    try {
-      switch (eventType) {
-        case 'created':
-          await this.#handleTargetCreated(target);
-          break;
-        case 'changed':
-          await this.#handleTargetChanged(target);
-          break;
-        case 'destroyed':
-          await this.#handleTargetDestroyed(target);
-          break;
-      }
-    } finally {
-      this.#operations.switchingTargetIds.delete(target);
-    }
-  }
-
-  #findTabIdByPage(page: Page): string | null {
-    for (const [tabId, tab] of this.#tabs) {
-      if (tab.page === page) {
-        return tabId;
-      }
-    }
-    return null;
-  }
-
-  #findTabIdByTarget(target: Target): string | null {
-    for (const [tabId, tab] of this.#tabs) {
-      if (tab.target === target) {
-        return tabId;
-      }
-    }
-    return null;
-  }
-
-  async #removeTab(tabId: string): Promise<void> {
-    this.#tabs.delete(tabId);
-    this.state.tabs.delete(tabId);
-
-    if (this.state.activeTabId === tabId) {
-      this.state.activeTabId = null;
-
-      const lastTabId = Array.from(this.state.tabs.keys()).pop();
-      if (lastTabId) {
-        await this.activeTab(lastTabId);
-      } else {
-        await this.createTab();
-      }
-    }
-  }
 
   async #syncTabMeta(tabId: string): Promise<void> {
     const tab = this.#tabs.get(tabId);

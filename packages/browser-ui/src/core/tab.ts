@@ -34,6 +34,8 @@ export class Tab extends EventEmitter<TabEventMap> {
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
 
+  #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
+
   constructor(page: Page, canvas: HTMLCanvasElement) {
     super();
     this.#pptrPage = page;
@@ -47,7 +49,7 @@ export class Tab extends EventEmitter<TabEventMap> {
     this.#renderer = new ScreencastRenderer(this.#id, page, canvas);
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
-    this.#pptrPage.on('dialog', (dialog: Dialog) => this.#onDialog(dialog));
+    this.#pptrPage.on('dialog', this.#dialogHandler);
   }
 
   get tabId() {
@@ -174,7 +176,28 @@ export class Tab extends EventEmitter<TabEventMap> {
   }
 
   async close() {
-    await this.#pptrPage.close();
+    this.#pptrPage.off('dialog', this.#dialogHandler);
+
+    if (this.#reloadAbortController) {
+      this.#reloadAbortController.abort();
+      this.#reloadAbortController = null;
+    }
+
+    try {
+      await this.#pptrPage.close();
+    } catch (error) {
+      // If the page has already been manually closed
+      // (not controlled by pptr, usually upon receiving the 'targetdestroyed' event),
+      // then it can be ignored directly.
+      if (
+        error instanceof Error &&
+        error.message.includes('No target with given id found')
+      ) {
+        return;
+      }
+
+      throw error;
+    }
   }
 
   async goto(
