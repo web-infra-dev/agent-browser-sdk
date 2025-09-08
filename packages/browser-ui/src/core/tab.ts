@@ -77,7 +77,7 @@ export class Tab extends EventEmitter<TabEventMap> {
       return this.#favicon;
     }
 
-    if (this.#url === 'about:blank' || this.#url.startsWith('chrome://')) {
+    if (this.url === 'about:blank' || this.url.startsWith('chrome://')) {
       return '';
     }
 
@@ -237,10 +237,10 @@ export class Tab extends EventEmitter<TabEventMap> {
     this.#setLoading(true);
 
     try {
-      await this.#pptrPage.setViewport({
-        width: 1280,
-        height: 720,
-      });
+      // await this.#pptrPage.setViewport({
+      //   width: 900,
+      //   height: 900,
+      // });
       await this.#pptrPage.goto(url, {
         waitUntil: options?.waitUntil || ['load'],
       });

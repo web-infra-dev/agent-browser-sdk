@@ -6,6 +6,8 @@ import { TabEvents } from '../event/tabs';
 import { Mutex } from '../utils/mutex';
 
 import { TabMeta, TabsState, TabsOperationTracker } from '../types/tabs';
+
+
 export class Tabs {
   #pptrBrowser: Browser;
   #tabs: Map<string, Tab>;
@@ -366,14 +368,14 @@ export class Tabs {
       isActive: tabId === this.state.activeTabId,
     };
 
-    console.log('syncTabMeta', tabId, tabMeta);
+    // console.log('syncTabMeta', tabId, tabMeta);
 
     this.state.tabs.set(tabId, tabMeta);
   }
 
   #setupTabEvents(tab: Tab, tabId: string): void {
-    tab.on(TabEvents.TabLoadingStateChanged, async () => {
-      await this.#syncTabMeta(tabId);
+    tab.on(TabEvents.TabLoadingStateChanged, () => {
+      this.#syncTabMeta(tabId);
     });
   }
 
