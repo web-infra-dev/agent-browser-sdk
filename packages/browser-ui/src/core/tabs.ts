@@ -266,7 +266,10 @@ export class Tabs {
 
   // #region public methods
 
+  #backMutex = new Mutex();
   async goBack(): Promise<boolean> {
+    using _ = await this.#backMutex.acquire();
+
     const activeTab = this.getActiveTab();
 
     if (!activeTab) {
@@ -276,7 +279,10 @@ export class Tabs {
     return await activeTab.goBack(['load']);
   }
 
+  #forwardMutex = new Mutex();
   async goForward(): Promise<boolean> {
+    using _ = await this.#forwardMutex.acquire();
+
     const activeTab = this.getActiveTab();
 
     if (!activeTab) {
@@ -286,7 +292,10 @@ export class Tabs {
     return await activeTab.goForward(['load']);
   }
 
+  #reloadMutex = new Mutex();
   async reload(): Promise<boolean> {
+    using _ = await this.#reloadMutex.acquire();
+
     const activeTab = this.getActiveTab();
 
     if (!activeTab) {
