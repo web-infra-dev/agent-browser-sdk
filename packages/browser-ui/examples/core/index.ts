@@ -28,9 +28,9 @@ function createTabElement(tabMeta: TabMeta, isActive: boolean): HTMLDivElement {
   tabElement.dataset.tabId = tabMeta.id;
 
   tabElement.innerHTML = `
-    <img class="tab-favicon" src="${tabMeta.favicon}" />
-    <span class="tab-title" title="${tabMeta.title}">${tabMeta.title}</span>
-    <button class="tab-close" title="Close tab">×</button>
+    <img class="tab-favicon" data-tab-id="ico-${tabMeta.id}" src="${tabMeta.favicon}" />
+    <span class="tab-title" data-tab-id="title-${tabMeta.id}" title="${tabMeta.title}">${tabMeta.title}</span>
+    <button class="tab-close" data-tab-id="close-${tabMeta.id}" title="Close tab">×</button>
   `;
 
   return tabElement;
