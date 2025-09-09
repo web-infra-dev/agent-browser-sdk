@@ -73,10 +73,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   async getFavicon(): Promise<string | null> {
-    if (this.#favicon) {
-      return this.#favicon;
-    }
-
     if (this.url === 'about:blank' || this.url.startsWith('chrome://')) {
       return '';
     }

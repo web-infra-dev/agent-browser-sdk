@@ -37,6 +37,7 @@ export class Tabs {
 
     this.#initializeExistingTabs();
 
+    // tabs events
     this.#pptrBrowser.on('targetcreated', (target) =>
       this.#handleTargetCreated(target),
     );
@@ -196,24 +197,6 @@ export class Tabs {
     // console.log('#activeTab this.state', tabId, this.state);
 
     return true;
-  }
-
-  async #handleTargetChanged(target: Target) {
-    console.log('handleTargetChanged', target);
-
-    if (target.type() !== 'page') {
-      return false;
-    }
-    const page = await target.page();
-    if (!page) {
-      return false;
-    }
-
-    // @ts-ignore
-    const targetId: string = target._targetId;
-    console.log('handleTargetChanged', targetId);
-
-    return await this.#activeTab(targetId);
   }
 
   async activeTab(tabId: string): Promise<boolean> {
@@ -380,6 +363,9 @@ export class Tabs {
 
   #setupTabEvents(tab: Tab, tabId: string): void {
     tab.on(TabEvents.TabLoadingStateChanged, () => {
+      this.#syncTabMeta(tabId);
+    });
+    tab.on(TabEvents.TabUrlChanged, () => {
       this.#syncTabMeta(tabId);
     });
     tab.on(

@@ -1,3 +1,5 @@
+import morphdom from 'morphdom';
+
 import { CanvasBrowser } from '../../src/core/browser';
 import type { TabMeta } from '../../src/types/tabs';
 
@@ -20,48 +22,80 @@ const canvasBrowser = await CanvasBrowser.create(canvasEle, {
 const tabs = canvasBrowser.tabs;
 
 // 初始化：创建第一个 tab
-// await tabs.createTab('https://www.google.com');
+function createTabElement(tabMeta: TabMeta, isActive: boolean): HTMLDivElement {
+  const tabElement = document.createElement('div');
+  tabElement.className = `tab ${isActive ? 'active' : ''}`;
+  tabElement.dataset.tabId = tabMeta.id;
 
-// 渲染 tabs UI
+  tabElement.innerHTML = `
+    <img class="tab-favicon" src="${tabMeta.favicon}" />
+    <span class="tab-title" title="${tabMeta.title}">${tabMeta.title}</span>
+    <button class="tab-close" title="Close tab">×</button>
+  `;
+
+  return tabElement;
+}
+
 function renderTabs() {
   const snapshot = tabs.getSnapshot();
-  tabsContainer.innerHTML = '';
 
   console.log('Rendering tabs:', snapshot);
 
-  snapshot.tabs.forEach((tabMeta: TabMeta) => {
-    const tabElement = document.createElement('div');
+  const targetContainer = document.createElement('div');
+  targetContainer.className = tabsContainer.className;
+  targetContainer.id = tabsContainer.id;
+
+  snapshot.tabs.forEach((tabMeta: TabMeta, tabId: string) => {
     const isActive = snapshot.activeTabId === tabMeta.id;
-    tabElement.className = `tab ${isActive ? 'active' : ''}`;
-    tabElement.dataset.tabId = tabMeta.id;
-
-    tabElement.innerHTML = `
-      <img class="tab-favicon" src="${tabMeta.favicon}" />
-      <span class="tab-title" title="${tabMeta.title}">${tabMeta.title}</span>
-      <button class="tab-close" title="Close tab">×</button>
-    `;
-
-    // Tab 点击切换
-    tabElement.addEventListener('click', async (e) => {
-      if ((e.target as HTMLElement).classList.contains('tab-close')) {
-        return; // 如果点击的是关闭按钮，不切换 tab
-      }
-      await tabs.activeTab(tabMeta.id);
-      updateControls();
-    });
-
-    // Tab 关闭
-    const closeBtn = tabElement.querySelector('.tab-close') as HTMLButtonElement;
-    closeBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      await tabs.closeTab(tabMeta.id);
-    });
-
-    tabsContainer.appendChild(tabElement);
+    const tabElement = createTabElement(tabMeta, isActive);
+    targetContainer.appendChild(tabElement);
   });
+
+  morphdom(tabsContainer, targetContainer, {
+    childrenOnly: true, // the targetContainer element will be skipped
+    onBeforeElUpdated: function (fromEl, toEl) {
+      // fast diff: https://github.com/patrick-steele-idem/morphdom/?tab=readme-ov-file#can-i-make-morphdom-blaze-through-the-dom-tree-even-faster-yes
+      if (fromEl.isEqualNode(toEl)) {
+        return false;
+      }
+      return true;
+    },
+    getNodeKey: (node) => {
+      if (node.nodeType === 1 && (node as Element).classList.contains('tab')) {
+        return (node as Element).getAttribute('data-tab-id');
+      }
+
+      if (node) {
+        return (
+          (node as Element).getAttribute && (node as Element).getAttribute('id')
+        );
+      }
+    },
+  });
+
 
   updateControls();
 }
+
+tabsContainer.addEventListener('click', async (e) => {
+  const target = e.target as HTMLElement;
+  const tabElement = target.closest('.tab') as HTMLDivElement;
+
+  if (!tabElement) return;
+
+  const tabId = tabElement.dataset.tabId;
+  if (!tabId) return;
+
+  if (target.classList.contains('tab-close')) {
+    // 关闭 tab
+    e.stopPropagation();
+    await tabs.closeTab(tabId);
+  } else {
+    // 切换 tab
+    await tabs.activeTab(tabId);
+    updateControls();
+  }
+});
 
 // 更新控制按钮状态
 function updateControls() {
