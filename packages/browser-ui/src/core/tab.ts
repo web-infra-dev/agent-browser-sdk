@@ -6,7 +6,7 @@ import type {
 } from 'puppeteer-core';
 import { EventEmitter } from 'eventemitter3';
 import { ScreencastRenderer } from './screencast-renderer';
-import { TabEvents, TabEventsMap } from '../types/tabs';
+import { TabEvents, TabEventsMap, TabOptions } from '../types/tabs';
 
 declare global {
   interface Window {
@@ -17,6 +17,7 @@ declare global {
 
 export class Tab extends EventEmitter<TabEventsMap> {
   #id: string;
+  #options: TabOptions;
   #status: 'active' | 'inactive';
 
   #pptrPage: Page;
@@ -31,17 +32,26 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
 
-  constructor(id: string, page: Page, canvas: HTMLCanvasElement) {
+  constructor(
+    page: Page,
+    canvas: HTMLCanvasElement,
+    options: TabOptions,
+  ) {
     super();
     this.#pptrPage = page;
+    this.#options = options;
+
     // CdpTarget has _targetId
     // @ts-ignore
-    this.#id = id || page.target()._targetId; // tabId is tagetId
+    this.#id = options.tabId || page.target()._targetId; // tabId is tagetId
     this.#url = page.url();
 
     this.#status = 'active';
 
-    this.#renderer = new ScreencastRenderer(this.#id, page, canvas);
+    this.#renderer = new ScreencastRenderer(page, canvas, {
+      tabId: options.tabId,
+      viewport: options.viewport,
+    });
 
     // 设置页面可见性监听
     this.#setupVisibilityTracking();
@@ -94,7 +104,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
       isLoading: true,
       tabId: this.#id,
     });
-  }
+  };
 
   #loadHandler = () => {
     this.emit(TabEvents.TabLoadingStateChanged, {
@@ -150,10 +160,10 @@ export class Tab extends EventEmitter<TabEventsMap> {
     this.#setLoading(true);
 
     try {
-      // await this.#pptrPage.setViewport({
-      //   width: 900,
-      //   height: 900,
-      // });
+      await this.#pptrPage.setViewport({
+        width: this.#options.viewport.width,
+        height: this.#options.viewport.height,
+      });
       await this.#pptrPage.goto(url, {
         waitUntil: options?.waitUntil || ['load'],
       });

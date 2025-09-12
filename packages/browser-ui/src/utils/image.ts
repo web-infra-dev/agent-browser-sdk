@@ -75,18 +75,7 @@ export async function drawBase64ToCanvas(
   const imageSource = await createImageFromBase64(base64, 'jpeg');
   const ctx = canvas.getContext('2d')!;
 
-  // const pixelRatio = window.devicePixelRatio || 1;
-  // const scaledWidth = width * pixelRatio;
-  // const scaledHeight = height * pixelRatio;
-  
-  // canvas.width = scaledWidth;
-  // canvas.height = scaledHeight;
-  
-  // canvas.style.width = `${width}px`;
-  // canvas.style.height = `${height}px`;
-  
-  // ctx.scale(pixelRatio, pixelRatio);
-
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(imageSource, 0, 0, width, height);
 
   releaseImageSource(imageSource);

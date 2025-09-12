@@ -22,23 +22,22 @@ import {
 import { drawBase64ToCanvas } from '../utils/image';
 
 interface ScreenCastOptions {
-  format?: 'jpeg' | 'png';
-  /**
-   * Compression quality from range [0..100].
-   */
-  quality?: number;
-  /**
-   * screenshot width.
-   */
-  width?: number;
-  /**
-   * screenshot height.
-   */
-  height?: number;
-  /**
-   * Send every n-th frame.
-   */
-  everyNthFrame?: number;
+  tabId: string;
+  viewport: {
+    width: number;
+    height: number;
+  };
+  cast?: {
+    format: 'jpeg' | 'png';
+    /**
+     * Compression quality from range [0..100].
+     */
+    quality: number;
+    /**
+     * Send every n-th frame.
+     */
+    everyNthFrame: number;
+  };
 }
 
 export class ScreencastRenderer extends EventEmitter {
@@ -54,23 +53,27 @@ export class ScreencastRenderer extends EventEmitter {
   #controller?: AbortController;
 
   constructor(
-    tabId: string,
     page: Page,
     canvas: HTMLCanvasElement,
-    options: ScreenCastOptions = {},
+    options: ScreenCastOptions,
   ) {
     super();
     this.#page = page;
-    this.#tabId = tabId;
+    this.#tabId = options.tabId;
     this.#canvas = canvas;
 
     this.#options = {
-      format: 'jpeg',
-      quality: 80,
-      width: 900,
-      height: 900,
-      everyNthFrame: 1,
-      ...options,
+      tabId: options.tabId,
+      viewport: {
+        width: options.viewport.width,
+        height: options.viewport.height,
+      },
+      cast: {
+        format: 'jpeg',
+        quality: 80,
+        everyNthFrame: 1,
+        ...options.cast,
+      }
     };
   }
 
@@ -107,15 +110,12 @@ export class ScreencastRenderer extends EventEmitter {
       filter((event) => {
         return event.metadata.timestamp !== undefined;
       }),
-      map((event) => {
-        return event.data;
-      }),
-      concatMap((base64String) => {
+      concatMap((event) => {
         return drawBase64ToCanvas(
           this.#canvas,
-          base64String,
-          this.#options.width,
-          this.#options.height,
+          event.data,
+          Math.min(this.#options.viewport.width, event.metadata.deviceWidth),
+          Math.min(this.#options.viewport.height, event.metadata.deviceHeight),
         );
       }),
       catchError((error) => {
@@ -137,11 +137,11 @@ export class ScreencastRenderer extends EventEmitter {
       await this.#initCDPSession();
 
       await this.#cdpSession!.send('Page.startScreencast', {
-        format: this.#options.format,
-        quality: this.#options.quality,
-        maxWidth: this.#options.width,
-        maxHeight: this.#options.height,
-        everyNthFrame: this.#options.everyNthFrame,
+        maxWidth: this.#options.viewport.width,
+        maxHeight: this.#options.viewport.height,
+        format: this.#options.cast.format,
+        quality: this.#options.cast.quality,
+        everyNthFrame: this.#options.cast.everyNthFrame,
       });
 
       this.#observable = this.#createScreencastObservable();
