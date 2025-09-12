@@ -17,6 +17,10 @@ const ws =
 
 const canvasBrowser = await CanvasBrowser.create(canvasEle, {
   wsEndpoint: ws,
+  viewport: {
+    width: 900,
+    height: 900,
+  }
 });
 
 const tabs = canvasBrowser.tabs;

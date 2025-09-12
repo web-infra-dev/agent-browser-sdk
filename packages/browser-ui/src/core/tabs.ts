@@ -10,19 +10,27 @@ import {
   TabMeta,
   TabsState,
   TabsOperationTracker,
+  TabsOptions,
 } from '../types/tabs';
 
 export class Tabs {
   #pptrBrowser: Browser;
   #tabs: Map<string, Tab>;
   #canvas: HTMLCanvasElement;
+  #options: TabsOptions;
+
   #operations: TabsOperationTracker;
 
   public state: TabsState;
 
-  constructor(browser: Browser, canvas: HTMLCanvasElement) {
+  constructor(
+    browser: Browser,
+    canvas: HTMLCanvasElement,
+    options: TabsOptions,
+  ) {
     this.#pptrBrowser = browser;
     this.#canvas = canvas;
+    this.#options = options;
 
     this.#tabs = new Map<string, Tab>();
     this.state = proxy({
@@ -74,7 +82,10 @@ export class Tabs {
       .map(async (pptrPage) => {
         // @ts-ignore
         const tabId = pptrPage.target()._targetId;
-        const tab = new Tab(tabId, pptrPage, this.#canvas);
+        const tab = new Tab(pptrPage, this.#canvas, {
+          tabId: tabId,
+          viewport: this.#options.viewport,
+        });
 
         this.#tabs.set(tabId, tab);
         this.#setupTabEvents(tab, tabId);
@@ -107,7 +118,10 @@ export class Tabs {
     }
     this.#operations.creatingTargetIds.add(targetId);
 
-    const tab = new Tab(targetId, pptrPage, this.#canvas);
+    const tab = new Tab(pptrPage, this.#canvas, {
+      tabId: targetId,
+      viewport: this.#options.viewport,
+    });
 
     this.#tabs.set(targetId, tab);
     this.#setupTabEvents(tab, targetId);
