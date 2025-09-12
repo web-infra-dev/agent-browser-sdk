@@ -48,7 +48,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
     this.#pptrPage.on('dialog', this.#dialogHandler);
-    this.#pptrPage.on('domcontentloaded', this.#loadHandler);
+    this.#pptrPage.on('domcontentloaded', this.#dclHandler);
     this.#pptrPage.on('load', this.#loadHandler);
     this.#pptrPage.on('framenavigated', this.#frameNavigatedHandler);
   }
@@ -89,9 +89,14 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
 
-  #loadHandler = () => {
-    console.log('loadHandler', this.#url);
+  #dclHandler = () => {
+    this.emit(TabEvents.TabLoadingStateChanged, {
+      isLoading: true,
+      tabId: this.#id,
+    });
+  }
 
+  #loadHandler = () => {
     this.emit(TabEvents.TabLoadingStateChanged, {
       isLoading: false,
       tabId: this.#id,
@@ -276,8 +281,9 @@ export class Tab extends EventEmitter<TabEventsMap> {
       return;
     }
 
+    // console.log('setLoading', loading, this.#url);
+
     this.#isLoading = loading;
-    console.log('setLoading', this.#url);
     this.emit(TabEvents.TabLoadingStateChanged, {
       isLoading: loading,
       tabId: this.#id,
@@ -311,16 +317,14 @@ export class Tab extends EventEmitter<TabEventsMap> {
       this.#title = await this.#pptrPage.title();
       this.#favicon = await this.#getFavicon();
 
-      // console.log('onFrameNavigated', newUrl, this.#title);
-
       if (oldUrl !== newUrl) {
+        // console.log('onFrameNavigated', newUrl, this.#isLoading);
+
         this.emit(TabEvents.TabUrlChanged, {
           tabId: this.#id,
           oldUrl,
           newUrl,
         });
-      } else {
-        // 处理 reload 的逻辑
       }
     }
   }
