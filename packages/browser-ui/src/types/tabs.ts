@@ -1,3 +1,13 @@
+import { Viewport } from "./browser";
+
+export interface TabsOptions {
+  viewport: Viewport;
+}
+
+export interface TabOptions extends TabsOptions {
+  tabId: string;
+}
+
 export const enum TabEvents {
   TabLoadingStateChanged = 'tabLoadingStateChanged',
   TabUrlChanged = 'tabUrlChanged',

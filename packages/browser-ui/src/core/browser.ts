@@ -2,6 +2,8 @@ import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser
 import type { Browser } from 'puppeteer-core';
 import { Tabs } from './tabs';
 
+import { BrowserOptions } from '../types/browser';
+
 /**
  * https://pptr.dev/guides/running-puppeteer-in-the-browser
  */
@@ -14,16 +16,15 @@ export class CanvasBrowser {
 
   static async create(
     element: HTMLCanvasElement,
-    options: {
-      wsEndpoint: string;
-    },
+    options: BrowserOptions,
   ): Promise<CanvasBrowser> {
     const pptrBrowser = (await connect({
       browserWSEndpoint: options.wsEndpoint,
       defaultViewport: {
-        width: 900,
-        height: 900,
-      }
+        width: options.viewport.width,
+        height: options.viewport.height,
+        deviceScaleFactor: 0, // Setting this value to 0 will reset this value to the system default.
+      },
     })) as unknown as Browser;
 
     if (!pptrBrowser) {
@@ -39,14 +40,12 @@ export class CanvasBrowser {
   private constructor(
     element: HTMLCanvasElement,
     pptrBrowser: Browser,
-    options: {
-      wsEndpoint: string;
-    },
+    options: BrowserOptions,
   ) {
     this.#element = element;
     this.#pptrBrowser = pptrBrowser;
     this.#wsEndpoint = options.wsEndpoint;
-    this.#tabs = new Tabs(pptrBrowser, element);
+    this.#tabs = new Tabs(pptrBrowser, element, { viewport: options.viewport });
   }
 
   get tabs(): Tabs {
