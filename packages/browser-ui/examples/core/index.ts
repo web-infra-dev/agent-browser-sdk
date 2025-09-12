@@ -13,10 +13,14 @@ const urlBar = document.getElementById('urlBar') as HTMLInputElement;
 const loadingIndicator = document.getElementById('loadingIndicator') as HTMLDivElement;
 
 const ws =
-  'ws://127.0.0.1:9222/devtools/browser/88c1e031-e86e-49a7-a4f8-390c947cc052';
+  'ws://127.0.0.1:9222/devtools/browser/8657d335-44d7-4c62-a32b-f3acfdcfe1c2';
 
 const canvasBrowser = await CanvasBrowser.create(canvasEle, {
   wsEndpoint: ws,
+  viewport: {
+    width: 900,
+    height: 900,
+  }
 });
 
 const tabs = canvasBrowser.tabs;

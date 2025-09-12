@@ -11,6 +11,7 @@ async function main() {
     defaultViewport: {
       width: 900,
       height: 900,
+      deviceScaleFactor: 0,
     },
     args: [
       '--remote-debugging-port=9222',
