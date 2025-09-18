@@ -98,5 +98,3 @@ Special thanks to the open source projects that inspired this toolkit:
 - [ChatWise](https://chatwise.app/) - Browser detection functionality reference
 - [readability](https://github.com/mozilla/readability/) - A standalone version of the readability lib
 - [edge-paths](https://github.com/shirshak55/edge-paths) - Edge browser path finder
-- [chrome-finder](https://github.com/gwuhaolin/chrome-finder) - Alternative Chrome finder
-- [find-chrome-bin](https://github.com/mbalabash/find-chrome-bin) - Another Chrome finder
