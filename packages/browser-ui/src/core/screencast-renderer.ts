@@ -146,6 +146,13 @@ export class ScreencastRenderer extends EventEmitter {
 
       await this.#initCDPSession();
 
+      // If setViewport is not called before each 'Page.startScreencast',
+      // the screenshot size given by screencastFrameAck may have slight deviations (for example, expected 900x900, actual 900x918)
+      // The exact reason is currently unknown.
+      await this.#page.setViewport({
+        width: this.#options.viewport.width,
+        height: this.#options.viewport.height,
+      });
       await this.#cdpSession!.send('Page.startScreencast', {
         maxWidth: this.#options.viewport.width,
         maxHeight: this.#options.viewport.height,
@@ -157,9 +164,7 @@ export class ScreencastRenderer extends EventEmitter {
       this.#observable = this.#createScreencastObservable();
 
       this.#observable.subscribe({
-        next: () => {
-          // 帧处理成功
-        },
+        next: () => {},
         error: (error) => {
           console.error('Screencast stream error:', error);
           this.stop();
@@ -186,12 +191,16 @@ export class ScreencastRenderer extends EventEmitter {
       return;
     }
 
-    await this.#cdpSession.send('Page.stopScreencast');
+    if (!this.#page.isClosed()) {
+      await this.#cdpSession.send('Page.stopScreencast');
+    }
 
     this.#controller?.abort();
     this.#observable = undefined;
 
-    await this.#cdpSession.detach();
+    if (!this.#page.isClosed()) {
+      await this.#cdpSession.detach();
+    }
     this.#cdpSession = undefined;
 
     this.#isRunning = false;
