@@ -188,9 +188,6 @@ importers:
       rxjs:
         specifier: 7.8.2
         version: 7.8.2
-      valtio:
-        specifier: 2.1.7
-        version: 2.1.7(@types/react@19.1.8)(react@19.1.1)
     devDependencies:
       '@rsbuild/core':
         specifier: 1.4.8
@@ -219,12 +216,6 @@ importers:
       jsdom:
         specifier: 26.1.0
         version: 26.1.0
-      react:
-        specifier: 19.1.1
-        version: 19.1.1
-      react-dom:
-        specifier: 19.1.1
-        version: 19.1.1(react@19.1.1)
       typescript:
         specifier: 5.8.3
         version: 5.8.3
