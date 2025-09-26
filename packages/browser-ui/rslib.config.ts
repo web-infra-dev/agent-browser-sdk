@@ -2,33 +2,39 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { pluginReact } from '@rsbuild/plugin-react';
+// import { pluginReact } from '@rsbuild/plugin-react';
 import { defineConfig } from '@rslib/core';
+
+const BANNER = `/**
+* Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+* SPDX-License-Identifier: Apache-2.0
+*/`;
 
 export default defineConfig({
   source: {
     entry: {
-      react: ['./src/react/**'],
+      index: ['src/**/*.ts', '!src/**/*.{test,bench}.ts'],
     },
   },
   lib: [
     {
+      format: 'esm',
+      syntax: 'es2021',
       bundle: false,
       dts: true,
-      format: 'esm',
+      banner: { js: BANNER },
     },
     {
+      format: 'cjs',
+      syntax: 'es2021',
       bundle: false,
       dts: true,
-      format: 'cjs',
+      banner: { js: BANNER },
     },
   ],
   output: {
-    minify: true,
-    distPath: {
-      root: './dist/react',
-    },
     target: 'web',
+    cleanDistPath: true,
+    sourceMap: true,
   },
-  plugins: [pluginReact()],
 });
