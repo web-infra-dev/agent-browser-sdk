@@ -48,6 +48,18 @@ export class Browser {
 
   constructor() {}
 
+  // #region public methods
+
+  async disconnect(): Promise<void> {
+    this.#isIntentionalDisconnect = true;
+
+    await this.#pptrBrowser?.disconnect();
+  }
+
+  // #endregion
+
+  // #region private methods
+
   async #init(options: LaunchOptions): Promise<void> {
     const processedOptions = this.#processOptions(options);
 
@@ -191,9 +203,5 @@ export class Browser {
     }
   }
 
-  async disconnect(): Promise<void> {
-    this.#isIntentionalDisconnect = true;
-
-    await this.#pptrBrowser?.disconnect();
-  }
+  // #endregion
 }
