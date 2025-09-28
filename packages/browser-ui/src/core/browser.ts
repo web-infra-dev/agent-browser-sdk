@@ -129,6 +129,8 @@ export class UIBrowser {
   #setupAutoReconnect(): void {
     // Listen for browser disconnection
     this.#pptrBrowser!.on('disconnected', () => {
+      // console.log('pptrBrowser disconnected');
+
       if (this.#isIntentionalDisconnect) {
         return;
       }
