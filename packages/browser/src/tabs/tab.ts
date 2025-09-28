@@ -136,7 +136,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
-  async goto(url: string, options: NavigationOptions): Promise<void> {
+  async goto(url: string, options: NavigationOptions = {}): Promise<void> {
     if (this.#dialog) {
       throw new Error('Cannot navigate while dialog is open');
     }
@@ -150,6 +150,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
       await this.#pptrPage.setViewport({
         width: this.#options.viewport.width,
         height: this.#options.viewport.height,
+        deviceScaleFactor: this.#options.viewport.deviceScaleFactor,
       });
       await this.#pptrPage.goto(url, {
         waitUntil: options.waitUntil,
@@ -166,7 +167,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
-  async goBack(options: NavigationOptions): Promise<boolean> {
+  async goBack(options: NavigationOptions = {}): Promise<boolean> {
     if (this.#dialog) {
       return false;
     }
@@ -178,7 +179,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
     return true;
   }
 
-  async goForward(options: NavigationOptions): Promise<boolean> {
+  async goForward(options: NavigationOptions = {}): Promise<boolean> {
     if (this.#dialog) {
       return false;
     }
@@ -190,7 +191,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
     return true;
   }
 
-  async reload(options: NavigationOptions): Promise<void> {
+  async reload(options: NavigationOptions = {}): Promise<void> {
     if (this.#reloadAbortController) {
       this.#reloadAbortController.abort();
     }

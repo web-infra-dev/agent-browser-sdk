@@ -42,6 +42,16 @@ export class UITab extends Tab {
 export class UITabs extends Tabs<UITab> {
   #canvas: HTMLCanvasElement;
 
+  static async UICreate(
+    browser: Browser,
+    canvas: HTMLCanvasElement,
+    options: TabsOptions,
+  ): Promise<UITabs> {
+    const tabs = new UITabs(browser, canvas, options);
+    await tabs.initializeExistingTabs();
+    return tabs;
+  }
+
   constructor(
     browser: Browser,
     canvas: HTMLCanvasElement,
