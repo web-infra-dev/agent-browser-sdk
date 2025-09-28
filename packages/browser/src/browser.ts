@@ -81,6 +81,13 @@ export class Browser {
     await this.#pptrBrowser?.disconnect();
   }
 
+  async close() {
+    this.#isIntentionalDisconnect = true;
+
+    await this.#tabs?.destroy();
+    await this.#pptrBrowser?.close();
+  }
+
   // #endregion
 
   // #region private methods
@@ -202,7 +209,7 @@ export class Browser {
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-    this.#tabs = new Tabs(this.#pptrBrowser, {
+    this.#tabs = await Tabs.create(this.#pptrBrowser, {
       viewport: this.#defaultViewport,
     });
     this.#setupAutoReconnect();
@@ -216,7 +223,7 @@ export class Browser {
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-    this.#tabs = new Tabs(this.#pptrBrowser, {
+    this.#tabs = await Tabs.create(this.#pptrBrowser, {
       viewport: this.#defaultViewport,
     });
     this.#setupAutoReconnect();
@@ -258,7 +265,7 @@ export class Browser {
       this.#pptrBrowser = await connect(connectOptions);
 
       this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-      this.#tabs = new Tabs(this.#pptrBrowser, {
+      this.#tabs = await Tabs.create(this.#pptrBrowser, {
         viewport: this.#defaultViewport,
       });
       this.#reconnectAttempts = 0;

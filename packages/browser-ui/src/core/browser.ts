@@ -1,4 +1,3 @@
-// /packages/browser-ui/src/core/browser.ts
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -138,7 +137,7 @@ export class UIBrowser {
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-    this.#tabs = new UITabs(this.#pptrBrowser, this.#element, {
+    this.#tabs = await UITabs.UICreate(this.#pptrBrowser, this.#element, {
       viewport: options.defaultViewport!,
     });
 
@@ -195,7 +194,7 @@ export class UIBrowser {
       })) as unknown as Browser;
 
       this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-      this.#tabs = new UITabs(this.#pptrBrowser, this.#element, {
+      this.#tabs = await UITabs.UICreate(this.#pptrBrowser, this.#element, {
         viewport: this.#defaultViewport,
       });
       this.#reconnectAttempts = 0;

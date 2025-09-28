@@ -10,9 +10,31 @@ function agentInfraDriver() {
   if (window.top !== window) {
     return;
   }
-  Object.defineProperty(navigator, 'webdriver', {
-    get: () => false
-  })
+  delete navigator.webdriver;
+  
+  const originalNavigator = navigator;
+  const navigatorHandler = {
+    get(target, prop) {
+      if (prop === 'webdriver') {
+        return false;
+      }
+      return Reflect.get(target, prop);
+    }
+  };
+  
+  try {
+    Object.defineProperty(window, 'navigator', {
+      value: new Proxy(originalNavigator, navigatorHandler),
+      writable: false,
+      configurable: false
+    });
+  } catch (e) {
+    Object.defineProperty(originalNavigator, 'webdriver', {
+      get: () => false,
+      enumerable: false,
+      configurable: true
+    });
+  }
 }
 agentInfraDriver();
 `;

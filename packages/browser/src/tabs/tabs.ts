@@ -27,6 +27,16 @@ export class Tabs<T extends Tab = Tab> {
   #operations: TabsOperationTracker;
 
   public state: TabsState;
+  #isIntentionalDestroy = false;
+
+  static async create(
+    browser: Browser,
+    options: TabsOptions,
+  ) {
+    const tabs = new Tabs(browser, options);
+    await tabs.initializeExistingTabs();
+    return tabs;
+  }
 
   constructor(browser: Browser, options: TabsOptions) {
     this.#pptrBrowser = browser;
@@ -42,8 +52,6 @@ export class Tabs<T extends Tab = Tab> {
       switchingTargetIds: new Set<string>(),
       closingTargetIds: new Set<string>(),
     };
-
-    this.#initializeExistingTabs();
 
     // tabs events
     this.#pptrBrowser.on('targetcreated', (target) =>
@@ -71,7 +79,7 @@ export class Tabs<T extends Tab = Tab> {
 
   // #region init ExistingTabs
 
-  async #initializeExistingTabs() {
+  protected async initializeExistingTabs() {
     const existingPages = await this.#pptrBrowser.pages();
 
     // console.log('initializeExistingTabs', existingPages);
@@ -249,7 +257,7 @@ export class Tabs<T extends Tab = Tab> {
     if (this.state.activeTabId === tabId) {
       this.state.activeTabId = null;
 
-      if (this.#tabs.size === 0) {
+      if (this.#tabs.size === 0 && !this.#isIntentionalDestroy) {
         await this.createTab();
       }
     }
@@ -320,7 +328,10 @@ export class Tabs<T extends Tab = Tab> {
     }
   }
 
-  async navigate(url: string, options: NavigationOptions = {}): Promise<boolean> {
+  async navigate(
+    url: string,
+    options: NavigationOptions = {},
+  ): Promise<boolean> {
     const activeTab = this.getActiveTab();
 
     if (!activeTab) {
@@ -346,6 +357,8 @@ export class Tabs<T extends Tab = Tab> {
   }
 
   async destroy(): Promise<void> {
+    this.#isIntentionalDestroy = true;
+
     const closeTasks = Array.from(this.#tabs.keys()).map((tabId) =>
       this.closeTab(tabId),
     );

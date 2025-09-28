@@ -5,7 +5,7 @@
 import puppeteer from 'puppeteer-core';
 import delay from 'delay';
 
-import { Hotkey, type OSType } from '../src';
+import { Hotkey, type OSType } from '../src/index.node';
 
 async function launchChrome(os: OSType, path: string) {
   const browser = await puppeteer.launch({

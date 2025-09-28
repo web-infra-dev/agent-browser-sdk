@@ -4,7 +4,7 @@
  */
 import puppeteer from 'puppeteer-core';
 
-import { getEnvInfo } from '../src';
+import { getEnvInfo } from '../src/index.node';
 
 async function testEnv(path: string) {
   const browser = await puppeteer.launch({
