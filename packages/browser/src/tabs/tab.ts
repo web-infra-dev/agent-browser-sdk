@@ -317,19 +317,19 @@ export class Tab extends EventEmitter<TabEventsMap> {
   async #onDialog(dialog: Dialog) {
     this.#dialog = dialog;
 
-    // this.emit('dialog', {
-    //   type: dialog.type,
-    //   message: dialog.message,
-    //   defaultValue: dialog.defaultValue,
-    //   accept: async (promptText?: string) => {
-    //     await dialog.accept(promptText);
-    //     this.#dialog = null;
-    //   },
-    //   dismiss: async () => {
-    //     await dialog.dismiss();
-    //     this.#dialog = null;
-    //   },
-    // });
+    this.emit(TabEvents.TabDialog, {
+      type: dialog.type,
+      message: dialog.message,
+      defaultValue: dialog.defaultValue,
+      accept: async (promptText?: string) => {
+        await dialog.accept(promptText);
+        this.#dialog = null;
+      },
+      dismiss: async () => {
+        await dialog.dismiss();
+        this.#dialog = null;
+      },
+    });
   }
 
   async #onFrameNavigated(frame: Frame) {

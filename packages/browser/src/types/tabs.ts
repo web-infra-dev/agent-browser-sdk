@@ -2,7 +2,11 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import type { PuppeteerLifeCycleEvent, Viewport } from 'puppeteer-core';
+import type {
+  Viewport,
+  Protocol,
+  PuppeteerLifeCycleEvent,
+} from 'puppeteer-core';
 
 export interface TabsOptions {
   viewport: Viewport;
@@ -16,6 +20,7 @@ export const enum TabEvents {
   TabLoadingStateChanged = 'tabLoadingStateChanged',
   TabUrlChanged = 'tabUrlChanged',
   TabVisibilityChanged = 'TabVisibilityChanged',
+  TabDialog = 'TabDialog',
 }
 
 export interface TabEventsMap {
@@ -31,6 +36,13 @@ export interface TabEventsMap {
   [TabEvents.TabVisibilityChanged]: {
     tabId: string;
     isVisible: boolean;
+  };
+  [TabEvents.TabDialog]: {
+    type: Protocol.Page.DialogType;
+    message: string;
+    defaultValue: string;
+    accept: (promptText?: string) => Promise<void>;
+    dismiss: () => Promise<void>;
   };
 }
 
