@@ -7,11 +7,8 @@
 
 export const disableWebdriver = /* javascript */ `
 function agentInfraDriver() {
-  if (window.top !== window) {
-    return;
-  }
   delete navigator.webdriver;
-  
+
   const originalNavigator = navigator;
   const navigatorHandler = {
     get(target, prop) {
@@ -21,7 +18,7 @@ function agentInfraDriver() {
       return Reflect.get(target, prop);
     }
   };
-  
+
   try {
     Object.defineProperty(window, 'navigator', {
       value: new Proxy(originalNavigator, navigatorHandler),
