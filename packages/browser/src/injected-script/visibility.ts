@@ -12,9 +12,6 @@ function agentInfraVisibilityScript() {
   if (window.top !== window) {
     return;
   }
-  if (window.__agent_infra_visibility_initialized) {
-    return;
-  }
 
   console.log('[agent-infra] visibility script injected');
 
@@ -24,8 +21,6 @@ function agentInfraVisibilityScript() {
       window.__agent_infra_visibility_change(isVisible);
     }
   }
-
-  window.__agent_infra_visibility_initialized = true;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', handleVisibilityChange);
