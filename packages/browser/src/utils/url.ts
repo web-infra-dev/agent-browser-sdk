@@ -22,7 +22,8 @@ export function validateNavigationUrl(rawUrl: string): ValidateResult {
     };
   }
 
-  if (original.toLowerCase().startsWith('chrome://newtab')) {
+  if (original.toLowerCase().startsWith('chrome://newtab') ||
+      original.toLowerCase().startsWith('chrome://new-tab-page')) {
     return { ignored: false, url: original };
   }
 
