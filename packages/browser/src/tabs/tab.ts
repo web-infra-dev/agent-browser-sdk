@@ -6,13 +6,14 @@ import { EventEmitter } from 'eventemitter3';
 import { disableWebdriver, visibilityScript } from '../injected-script';
 import { iife, validateNavigationUrl } from '../utils';
 
-import type { Page, Frame, Dialog } from 'puppeteer-core';
+import type { Page, Frame } from 'puppeteer-core';
 import {
   TabEvents,
   type NavigationOptions,
   type TabEventsMap,
   type TabOptions,
 } from '../types';
+import { TabDialog } from './dialog';
 
 
 export class Tab extends EventEmitter<TabEventsMap> {
@@ -26,7 +27,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
   #favicon = '';
   #title = '';
 
-  #dialog: Dialog | null = null;
+  #tabDialog: TabDialog;
 
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
@@ -45,12 +46,12 @@ export class Tab extends EventEmitter<TabEventsMap> {
     this.#url = page.url();
 
     this.#status = 'active';
+    this.#tabDialog = new TabDialog(this);
 
     this.#setupVisibilityTracking();
     this.#executeScriptsOnCreate();
 
     // page events: https://pptr.dev/api/puppeteer.pageevent
-    this.#pptrPage.on('dialog', this.#dialogHandler);
     this.#pptrPage.on('domcontentloaded', this.#dclHandler);
     this.#pptrPage.on('load', this.#loadHandler);
     this.#pptrPage.on('framenavigated', this.#frameNavigatedHandler);
@@ -90,8 +91,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #region events handler
 
-  #dialogHandler = (dialog: Dialog) => this.#onDialog(dialog);
-
   #dclHandler = () => {
     this.emit(TabEvents.TabLoadingStateChanged, {
       isLoading: true,
@@ -111,7 +110,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #endregion
 
-  // #region public methods
+  // #region active status
 
   async active() {
     await this.#pptrPage.bringToFront();
@@ -136,11 +135,11 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
-  async goto(url: string, options: NavigationOptions = {}): Promise<void> {
-    if (this.#dialog) {
-      throw new Error('Cannot navigate while dialog is open');
-    }
+  // #endregion
 
+  // #region navigation
+
+  async goto(url: string, options: NavigationOptions = {}): Promise<void> {
     // validate / normalize url before navigation
     const validated = validateNavigationUrl(url);
     if (validated.ignored) {
@@ -174,10 +173,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   async goBack(options: NavigationOptions = {}): Promise<boolean> {
-    if (this.#dialog) {
-      return false;
-    }
-
     await this.#pptrPage.goBack({
       waitUntil: options.waitUntil,
       timeout: options.timeout,
@@ -186,10 +181,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   async goForward(options: NavigationOptions = {}): Promise<boolean> {
-    if (this.#dialog) {
-      return false;
-    }
-
     await this.#pptrPage.goForward({
       waitUntil: options.waitUntil,
       timeout: options.timeout,
@@ -220,7 +211,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   async close() {
-    this.#pptrPage.off('dialog', this.#dialogHandler);
     this.#pptrPage.off('load', this.#loadHandler);
     this.#pptrPage.off('framenavigated', this.#frameNavigatedHandler);
 
@@ -228,6 +218,8 @@ export class Tab extends EventEmitter<TabEventsMap> {
       this.#reloadAbortController.abort();
       this.#reloadAbortController = null;
     }
+
+    this.#tabDialog.cleanup();
 
     try {
       await this.#pptrPage.close();
@@ -246,6 +238,37 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
+  async #onFrameNavigated(frame: Frame) {
+    if (!frame.parentFrame()) {
+      const oldUrl = this.#url;
+      const newUrl = frame.url();
+
+      this.#url = newUrl;
+      this.#title = await this.#pptrPage.title();
+      this.#favicon = await this.#getFavicon();
+
+      if (oldUrl !== newUrl) {
+        this.emit(TabEvents.TabUrlChanged, {
+          tabId: this.#id,
+          oldUrl,
+          newUrl,
+        });
+      }
+    }
+  }
+
+  // #endregion
+
+  // #region dialog
+
+  get dialog() {
+    return this.#tabDialog;
+  }
+
+  // #endregion
+
+  // #region injectScript
+
   injectScriptOnCreate(script: string | string[]) {
     if (Array.isArray(script)) {
       this.#scriptsOnCreate.push(...script);
@@ -262,9 +285,38 @@ export class Tab extends EventEmitter<TabEventsMap> {
     }
   }
 
-  // #endregion
+  async #setupVisibilityTracking() {
+    await this.#pptrPage.exposeFunction(
+      '__agent_infra_visibility_change',
+      (isVisible: boolean) => {
+        this.emit(TabEvents.TabVisibilityChanged, {
+          tabId: this.#id,
+          isVisible,
+        });
+      },
+    );
+  }
 
-  // #region pravite methods
+  async #executeScriptsOnCreate() {
+    try {
+      const script = iife(this.#scriptsOnCreate.join('\n'));
+      await this.#pptrPage.evaluateOnNewDocument(script);
+      await this.#pptrPage.evaluate(script);
+    } catch (error) {
+      console.warn('Failed to execute script on create:', error);
+    }
+  }
+
+  async #executeScriptsOnLoad(): Promise<void> {
+    try {
+      const script = iife(this.#scriptsOnLoad.join('\n'));
+      await this.#pptrPage.evaluate(script);
+    } catch (error) {
+      console.warn('Failed to execute script on load:', error);
+    }
+  }
+
+  // #endregion
 
   async #getFavicon() {
     if (this.url === 'about:blank' || this.url.startsWith('chrome://')) {
@@ -313,73 +365,4 @@ export class Tab extends EventEmitter<TabEventsMap> {
       tabId: this.#id,
     });
   }
-
-  async #onDialog(dialog: Dialog) {
-    this.#dialog = dialog;
-
-    // this.emit('dialog', {
-    //   type: dialog.type,
-    //   message: dialog.message,
-    //   defaultValue: dialog.defaultValue,
-    //   accept: async (promptText?: string) => {
-    //     await dialog.accept(promptText);
-    //     this.#dialog = null;
-    //   },
-    //   dismiss: async () => {
-    //     await dialog.dismiss();
-    //     this.#dialog = null;
-    //   },
-    // });
-  }
-
-  async #onFrameNavigated(frame: Frame) {
-    if (!frame.parentFrame()) {
-      const oldUrl = this.#url;
-      const newUrl = frame.url();
-
-      this.#url = newUrl;
-      this.#title = await this.#pptrPage.title();
-      this.#favicon = await this.#getFavicon();
-
-      if (oldUrl !== newUrl) {
-        this.emit(TabEvents.TabUrlChanged, {
-          tabId: this.#id,
-          oldUrl,
-          newUrl,
-        });
-      }
-    }
-  }
-
-  async #setupVisibilityTracking() {
-    await this.#pptrPage.exposeFunction(
-      '__agent_infra_visibility_change',
-      (isVisible: boolean) => {
-        this.emit(TabEvents.TabVisibilityChanged, {
-          tabId: this.#id,
-          isVisible,
-        });
-      },
-    );
-  }
-
-  async #executeScriptsOnCreate() {
-    try {
-      const script = iife(this.#scriptsOnCreate.join('\n'));
-      await this.#pptrPage.evaluateOnNewDocument(script);
-      await this.#pptrPage.evaluate(script);
-    } catch (error) {
-      console.warn('Failed to execute script on create:', error);
-    }
-  }
-
-  async #executeScriptsOnLoad(): Promise<void> {
-    try {
-      const script = iife(this.#scriptsOnLoad.join('\n'));
-      await this.#pptrPage.evaluate(script);
-    } catch (error) {
-      console.warn('Failed to execute script on load:', error);
-    }
-  }
-  // #endregion
 }
