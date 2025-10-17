@@ -197,6 +197,13 @@ export class UIBrowser {
       this.#tabs = await UITabs.UICreate(this.#pptrBrowser, this.#element, {
         viewport: this.#defaultViewport,
       });
+
+      // Restore active tab's ScreencastRenderer after reconnection
+      const activeTab = this.#tabs.getActiveTab();
+      if (activeTab) {
+        await activeTab.active();
+      }
+
       this.#reconnectAttempts = 0;
     } catch (error) {
       if (this.#reconnectAttempts < MAX_RETRIES) {
