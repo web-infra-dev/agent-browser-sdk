@@ -8,8 +8,11 @@ import type {
   PuppeteerLifeCycleEvent,
 } from 'puppeteer-core';
 
+import type { EnvInfo } from './env';
+
 export interface TabsOptions {
   viewport: Viewport;
+  envInfo: EnvInfo;
 }
 
 export interface TabOptions extends TabsOptions {

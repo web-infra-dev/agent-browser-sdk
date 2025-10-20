@@ -97,7 +97,7 @@ export class Tabs<T extends Tab = Tab> {
         const tabId = pptrPage.target()._targetId;
         const tab = this.createTabInstance(pptrPage, {
           tabId: tabId,
-          viewport: this.#options.viewport,
+          ...this.#options,
         });
 
         this.#tabs.set(tabId, tab);
@@ -133,7 +133,7 @@ export class Tabs<T extends Tab = Tab> {
 
     const tab = this.createTabInstance(pptrPage, {
       tabId: targetId,
-      viewport: this.#options.viewport,
+      ...this.#options,
     });
 
     this.#tabs.set(targetId, tab);

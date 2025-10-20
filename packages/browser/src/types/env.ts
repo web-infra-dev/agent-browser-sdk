@@ -5,3 +5,9 @@
 export type OSType = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
 
 export type BrowserType = 'Chrome' | 'Edge' | 'Firefox' | 'Unknown';
+
+export interface EnvInfo {
+  osName: OSType;
+  browserName: BrowserType;
+  browserVersion: string;
+}
