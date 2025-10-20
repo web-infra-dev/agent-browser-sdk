@@ -3,13 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import type { Browser } from 'puppeteer-core';
-import type { OSType, BrowserType } from './types/env';
-
-export interface EnvInfo {
-  osName: OSType;
-  browserName: BrowserType;
-  browserVersion: string;
-}
+import type { OSType, BrowserType, EnvInfo } from './types/env';
 
 export async function getEnvInfo(browser: Browser): Promise<EnvInfo> {
   let osName: OSType = 'Unknown';

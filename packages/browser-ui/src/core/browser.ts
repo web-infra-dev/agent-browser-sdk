@@ -6,6 +6,8 @@ import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser
 import { getEnvInfo } from '@agent-infra/browser/web';
 import { UITabs } from './tabs';
 
+import type { EnvInfo } from '@agent-infra/browser/web';
+
 import type { Browser, Viewport, ConnectOptions } from 'puppeteer-core';
 
 const MAX_RETRIES = 5;
@@ -19,6 +21,7 @@ export class UIBrowser {
   #wsEndpoint?: string;
   #pptrBrowser?: Browser;
   #tabs?: UITabs;
+  #envInfo?: EnvInfo;
   // https://pptr.dev/api/puppeteer.viewport
   #defaultViewport: Viewport = {
     // pptr default width and height are 800 x 600,
@@ -59,13 +62,10 @@ export class UIBrowser {
       throw new Error('Browser not initialized');
     }
 
-    const [envInfo, userAgent] = await Promise.all([
-      getEnvInfo(this.#pptrBrowser),
-      this.#pptrBrowser.userAgent(),
-    ]);
+    const userAgent = await this.#pptrBrowser.userAgent();
 
     return {
-      ...envInfo,
+      envInfo: this.#envInfo!,
       userAgent,
       viewport: this.#defaultViewport,
       wsEndpoint: this.#wsEndpoint,
@@ -137,8 +137,11 @@ export class UIBrowser {
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
+
+    this.#envInfo = await getEnvInfo(this.#pptrBrowser);
     this.#tabs = await UITabs.UICreate(this.#pptrBrowser, this.#element, {
       viewport: options.defaultViewport!,
+      envInfo: this.#envInfo,
     });
 
     this.#setupAutoReconnect();
@@ -194,8 +197,10 @@ export class UIBrowser {
       })) as unknown as Browser;
 
       this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
+
       this.#tabs = await UITabs.UICreate(this.#pptrBrowser, this.#element, {
         viewport: this.#defaultViewport,
+        envInfo: this.#envInfo!,
       });
 
       // Restore active tab's ScreencastRenderer after reconnection

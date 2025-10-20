@@ -14,6 +14,7 @@ import type {
   ConnectOptions,
   Viewport,
 } from 'puppeteer-core';
+import { EnvInfo } from './types';
 
 const MAX_RETRIES = 5;
 const INITIAL_BACKOFF = 2000;
@@ -23,6 +24,7 @@ export class Browser {
   #tabs?: Tabs;
 
   #wsEndpoint = '';
+  #envInfo?: EnvInfo;
   // https://pptr.dev/api/puppeteer.viewport
   #defaultViewport: Viewport = {
     // pptr default width and height are 800 x 600,
@@ -62,13 +64,10 @@ export class Browser {
       throw new Error('Browser not initialized');
     }
 
-    const [envInfo, userAgent] = await Promise.all([
-      getEnvInfo(this.#pptrBrowser),
-      this.#pptrBrowser.userAgent(),
-    ]);
+    const userAgent = await this.#pptrBrowser.userAgent();
 
     return {
-      ...envInfo,
+      envInfo: this.#envInfo!,
       userAgent,
       viewport: this.#defaultViewport,
       wsEndpoint: this.#wsEndpoint,
@@ -175,7 +174,7 @@ export class Browser {
       } else {
         processedOptions.ignoreDefaultArgs = [enableAutomationArg];
       }
-    }
+    };
 
     // 1.Set default viewport
     processedOptions.defaultViewport = setDefaultViewport(
@@ -204,7 +203,6 @@ export class Browser {
       setArgs();
     }
 
-
     return processedOptions;
   }
 
@@ -216,8 +214,11 @@ export class Browser {
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
+
+    this.#envInfo = await getEnvInfo(this.#pptrBrowser);
     this.#tabs = await Tabs.create(this.#pptrBrowser, {
       viewport: this.#defaultViewport,
+      envInfo: this.#envInfo,
     });
     this.#setupAutoReconnect();
   }
@@ -230,8 +231,11 @@ export class Browser {
     }
 
     this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
+
+    this.#envInfo = await getEnvInfo(this.#pptrBrowser);
     this.#tabs = await Tabs.create(this.#pptrBrowser, {
       viewport: this.#defaultViewport,
+      envInfo: this.#envInfo,
     });
     this.#setupAutoReconnect();
   }
@@ -272,8 +276,10 @@ export class Browser {
       this.#pptrBrowser = await connect(connectOptions);
 
       this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
+
       this.#tabs = await Tabs.create(this.#pptrBrowser, {
         viewport: this.#defaultViewport,
+        envInfo: this.#envInfo!,
       });
       this.#reconnectAttempts = 0;
     } catch (error) {
