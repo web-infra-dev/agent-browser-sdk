@@ -5,6 +5,8 @@
 import { EventEmitter } from 'eventemitter3';
 import { disableWebdriver, visibilityScript } from '../injected-script';
 import { iife, validateNavigationUrl } from '../utils';
+import { TabDialog } from './dialog';
+import { Mouse, Keyboard } from '../actions';
 
 import type { Page, Frame } from 'puppeteer-core';
 import {
@@ -13,8 +15,6 @@ import {
   type TabEventsMap,
   type TabOptions,
 } from '../types';
-import { TabDialog } from './dialog';
-import { Keyboard } from '../actions/keyboard';
 
 
 export class Tab extends EventEmitter<TabEventsMap> {
@@ -30,6 +30,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   #tabDialog: TabDialog;
   #keyboard: Keyboard;
+  #mouse: Mouse;
 
   #isLoading = false;
   #reloadAbortController: AbortController | null = null;
@@ -50,6 +51,7 @@ export class Tab extends EventEmitter<TabEventsMap> {
     this.#status = 'active';
     this.#tabDialog = new TabDialog(this);
     this.#keyboard = new Keyboard(page, options.envInfo);
+    this.#mouse = new Mouse(page);
 
     this.#setupVisibilityTracking();
     this.#executeScriptsOnCreate();
@@ -136,6 +138,22 @@ export class Tab extends EventEmitter<TabEventsMap> {
     } catch (error) {
       return false;
     }
+  }
+
+  // #endregion
+
+  // #region dialog/keyboard/mouse
+
+  get dialog() {
+    return this.#tabDialog;
+  }
+
+  get keyboard() {
+    return this.#keyboard;
+  }
+
+  get mouse() {
+    return this.#mouse;
   }
 
   // #endregion
@@ -258,22 +276,6 @@ export class Tab extends EventEmitter<TabEventsMap> {
         });
       }
     }
-  }
-
-  // #endregion
-
-  // #region dialog
-
-  get dialog() {
-    return this.#tabDialog;
-  }
-
-  // #endregion
-
-  // #region keyboard
-
-  get keyboard() {
-    return this.#keyboard;
   }
 
   // #endregion
