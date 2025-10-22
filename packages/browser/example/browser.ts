@@ -13,8 +13,12 @@ async function main() {
 
   await tab!.goto('https://bot-detector.rebrowser.net/');
   await new Promise((resolve) => setTimeout(resolve, 3000));
-  await tab!.page.screenshot({ path: './example/bot-detector.png', fullPage: true });
+  const data = await tab!.screenshot({ path: './example/bot-detector.png', fullPage: true });
 
+  // @ts-ignore
+  delete data.data;
+
+  console.log('Screenshot data:', data);
 
   await browser.close();
 }

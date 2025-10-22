@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EventEmitter } from 'eventemitter3';
-import { Base64ImageParser } from "@agent-infra/media-utils";
+import { Base64ImageParser } from '@agent-infra/media-utils';
 import { disableWebdriver, visibilityScript } from '../injected-script';
 import { iife, validateNavigationUrl } from '../utils';
 import { TabDialog } from './dialog';
@@ -16,8 +16,8 @@ import {
   type TabEventsMap,
   type TabOptions,
   type TabScreenshotOptions,
+  type TabScreenshotResult,
 } from '../types';
-
 
 export class Tab extends EventEmitter<TabEventsMap> {
   #id: string;
@@ -162,21 +162,68 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #region screenshot
 
-  async screenshot(options: TabScreenshotOptions = {}) {
+  async screenshot<T extends TabScreenshotOptions>(
+    options: T = {} as T,
+  ): Promise<TabScreenshotResult<T>> {
+    // Determine the image type, handling path extension if provided
+    let imageType = options.type;
+    if (options.path) {
+      const extension = options.path
+        .slice(options.path.lastIndexOf('.') + 1)
+        .toLowerCase();
+
+      switch (extension) {
+        case 'png':
+          imageType = 'png';
+          break;
+        case 'jpeg':
+        case 'jpg':
+          imageType = 'jpeg';
+          break;
+        case 'webp':
+          imageType = 'webp';
+          break;
+        default:
+          imageType = imageType || 'png';
+      }
+    }
+
     const base64Image = await this.#pptrPage.screenshot({
       encoding: 'base64',
-      type: options.type,
+      type: imageType,
       quality: options.quality,
       fullPage: options.fullPage,
     });
     const meta = new Base64ImageParser(base64Image);
+    const type = meta.getImageType()!;
+    const width = meta.getDimensions()!.width;
+    const height = meta.getDimensions()!.height;
+
+    // If path is provided, write the file and return absolute path
+    if (options.path) {
+      const { promises: fs } = await import('fs');
+      const { resolve: pathResolve } = await import('path');
+
+      const absolutePath = pathResolve(options.path);
+      const buffer = Buffer.from(base64Image, 'base64');
+
+      await fs.writeFile(absolutePath, buffer);
+
+      return {
+        data: base64Image,
+        type: type,
+        width: width,
+        height: height,
+        absolutePath: absolutePath,
+      } as TabScreenshotResult<T>;
+    }
 
     return {
       data: base64Image,
-      type: meta.getImageType()!,
-      width: meta.getDimensions()!.width,
-      height: meta.getDimensions()!.height,
-    };
+      type: type,
+      width: width,
+      height: height,
+    } as TabScreenshotResult<T>;
   }
 
   // #endregion

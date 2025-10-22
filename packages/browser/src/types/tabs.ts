@@ -82,8 +82,23 @@ export interface NavigationOptions {
   timeout?: number;
 }
 
-// TODO: add path options
 export type TabScreenshotOptions = Pick<
   ScreenshotOptions,
-  'type' | 'quality' | 'fullPage'
+  'type' | 'quality' | 'fullPage' | 'path'
 >;
+
+export interface BaseScreenshotResult {
+  data: string;
+  type: string;
+  width: number;
+  height: number;
+}
+
+export interface ScreenshotResultWithPath extends BaseScreenshotResult {
+  absolutePath: string;
+}
+
+export type TabScreenshotResult<T extends TabScreenshotOptions> =
+  T extends { path: string }
+    ? ScreenshotResultWithPath
+    : BaseScreenshotResult;
