@@ -145,3 +145,6 @@ vite.config.ts.timestamp-*
 .vscode/*
 !.vscode/extensions.json
 .idea
+
+# Code Agent
+.claude
