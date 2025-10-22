@@ -12,7 +12,7 @@ export const IMAGE_TYPE_MAP = new Map<string, ImageType>([
   ['Qk', 'bmp'], // BMP: 42 4D
 ]);
 
-export function base64String2Uint8Array(base64: string) {
+export function base64String2Uint8Array(base64: string): Uint8Array<ArrayBuffer> {
   // @ts-ignore
   if (typeof Uint8Array.fromBase64 === 'function') {
     // New Uint8Array API
