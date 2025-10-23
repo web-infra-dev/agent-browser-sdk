@@ -88,17 +88,20 @@ export type TabScreenshotOptions = Pick<
 >;
 
 export interface BaseScreenshotResult {
-  data: string;
   type: string;
   width: number;
   height: number;
 }
 
 export interface ScreenshotResultWithPath extends BaseScreenshotResult {
-  absolutePath: string;
+  data: Uint8Array;
+}
+
+export interface ScreenshotResultWithoutPath extends BaseScreenshotResult {
+  data: string;
 }
 
 export type TabScreenshotResult<T extends TabScreenshotOptions> =
   T extends { path: string }
     ? ScreenshotResultWithPath
-    : BaseScreenshotResult;
+    : ScreenshotResultWithoutPath;
