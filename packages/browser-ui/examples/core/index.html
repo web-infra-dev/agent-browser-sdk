@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CanvasBrowser Demo (Lit Components)</title>
+  <title>CanvasBrowser Demo</title>
   <style>
     body {
       margin: 0;
@@ -15,11 +15,9 @@
 </head>
 
 <body>
-  <h1>CanvasBrowser Demo (Lit Components)</h1>
-
-  <ai-browser-container id="browserContainer" canvas-width="900" canvas-height="900">
-    <!-- All browser UI components will be rendered inside this web component -->
-  </ai-browser-container>
+  <div id="browserContainer">
+    <!-- Browser UI will be automatically mounted here -->
+  </div>
 
   <script type="module" src="./index.ts"></script>
 </body>
