@@ -34,7 +34,32 @@
 
     .tabs-container {
       display: flex;
-      gap: 6px;
+      gap: 2px;
+    }
+
+    .tab-divider {
+      width: 1px;
+      height: 14px;
+      background-color: #b0b0b0;
+      flex-shrink: 0;
+      align-self: center;
+      transition: background-color 0.15s ease;
+    }
+
+    .tab.active + .tab-divider {
+      background-color: transparent;
+    }
+
+    .tab-divider:has(+ .tab.active) {
+      background: transparent;
+    }
+
+    .tab:hover + .tab-divider {
+      background-color: transparent;
+    }
+
+    .tab-divider:has(+ .tab:hover) {
+      background: transparent;
     }
 
     .tab {

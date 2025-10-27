@@ -143,10 +143,21 @@ function renderTabs() {
   targetContainer.className = tabsContainer.className;
   targetContainer.id = tabsContainer.id;
 
-  snapshot.tabs.forEach((tabMeta, tabId: string) => {
-    const isActive = snapshot.activeTabId === tabMeta.id;
+  const tabIds = Array.from(snapshot.tabs.keys());
+  tabIds.forEach((tabId, index) => {
+    const tabMeta = snapshot.tabs.get(tabId);
+    if (!tabMeta) return;
+
+    const isActive = snapshot.activeTabId === tabId;
     const tabElement = createTabElement(tabMeta, isActive);
     targetContainer.appendChild(tabElement);
+
+    // 添加分割线（当前tab不是最后一个tab且当前tab不是active tab）
+    if (index < tabIds.length - 1) {
+      const divider = document.createElement('div');
+      divider.className = 'tab-divider';
+      targetContainer.appendChild(divider);
+    }
   });
 
   morphdom(tabsContainer, targetContainer, {
@@ -161,6 +172,10 @@ function renderTabs() {
     getNodeKey: (node) => {
       if (node.nodeType === 1 && (node as Element).classList.contains('tab')) {
         return (node as Element).getAttribute('data-tab-id');
+      }
+
+      if (node.nodeType === 1 && (node as Element).classList.contains('tab-divider')) {
+        return 'tab-divider';
       }
 
       if (node) {
