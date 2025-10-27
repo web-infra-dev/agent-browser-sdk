@@ -34,7 +34,6 @@
 
     .tabs-container {
       display: flex;
-      flex: 1;
       gap: 6px;
     }
 
@@ -66,18 +65,6 @@
       box-shadow: 0 4px 0 0 #fff;
     }
 
-    /* .tab.active::after {
-      content: " ";
-      display: block;
-      position: absolute;
-      left: 0;
-      bottom: -4px;
-      width: 100%;
-      height: 4px;
-      background: red;
-      z-index: 10;
-    } */
-
     .tab-favicon {
       width: 16px;
       height: 16px;
@@ -90,10 +77,13 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .tab-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 16px;
       height: 16px;
       margin-left: 8px;
@@ -112,15 +102,19 @@
     }
 
     .new-tab-btn {
-      /* padding: 8px 12px;
-      border: 1px solid #ddd;
-      background-color: #fff;
-      border-radius: 4px;
-      margin-left: 5px; */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: none;
+      border-radius: 14px;
+      background-color: transparent;
     }
 
     .new-tab-btn:hover {
-      background-color: #f0f0f0;
+      background-color: #c7c7c7;
     }
 
     .controls-bar {
@@ -335,31 +329,39 @@
       <div class="tabs-container" id="tabsContainer">
         <!-- Tabs will be rendered here -->
       </div>
-      <button class="new-tab-btn" id="newTabBtn">+ New Tab</button>
+      <button class="new-tab-btn" id="newTabBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus">
+          <path d="M5 12h14" />
+          <path d="M12 5v14" />
+        </svg>
+      </button>
     </div>
 
     <!-- Controls Bar -->
     <div class="controls-bar">
       <div class="nav-buttons">
         <button class="nav-btn" id="backBtn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-short"
-            viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-arrow-left-icon lucide-arrow-left">
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
           </svg>
         </button>
         <button class="nav-btn" id="forwardBtn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short"
-            viewBox="0 0 16 16">
-            <path fill-rule="evenodd"
-              d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-arrow-right-icon lucide-arrow-right">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
           </svg>
         </button>
         <button class="nav-btn" id="refreshBtn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise"
-            viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
-            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-cw-icon lucide-rotate-cw">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+            <path d="M21 3v5h-5" />
           </svg>
         </button>
       </div>
