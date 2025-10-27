@@ -13,7 +13,7 @@ export interface DialogMeta {
   defaultValue?: string;
 }
 
-@customElement('dialog-component')
+@customElement('ai-browser-dialog')
 export class DialogComponent extends LitElement {
   static styles = css`
     :host {
@@ -221,6 +221,6 @@ export class DialogComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'dialog-component': DialogComponent;
+    'ai-browser-dialog': DialogComponent;
   }
 }

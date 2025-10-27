@@ -4,12 +4,12 @@
  */
 
 // Export all components
+export { BrowserContainer } from './container.js';
 export { TabBar } from './tab-bar.js';
-export { TabComponent } from './tab-component.js';
+export { TabComponent } from './tab.js';
 export { ControlsBar } from './controls-bar.js';
-export { DialogComponent } from './dialog-component.js';
-export { BrowserContainer } from './browser-container.js';
+export { DialogComponent } from './dialog.js';
 
 // Export types
-export type { TabMeta } from './tab-component.js';
-export type { DialogType, DialogMeta } from './dialog-component.js';
+export type { TabMeta } from './tab.js';
+export type { DialogType, DialogMeta } from './dialog.js';

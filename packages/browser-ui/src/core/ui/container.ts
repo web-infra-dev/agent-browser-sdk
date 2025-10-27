@@ -4,10 +4,10 @@
  */
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import type { TabMeta } from './tab-component';
-import type { DialogMeta } from './dialog-component';
+import type { TabMeta } from './tab';
+import type { DialogMeta } from './dialog';
 
-@customElement('browser-container')
+@customElement('ai-browser-container')
 export class BrowserContainer extends LitElement {
   static styles = css`
     :host {
@@ -73,21 +73,21 @@ export class BrowserContainer extends LitElement {
 
   render() {
     return html`
-      <tab-bar
+      <ai-browser-tab-bar
         .tabs=${this.tabs}
         .activeTabId=${this.activeTabId}
         @tab-activate=${this._handleTabActivate}
         @tab-close=${this._handleTabClose}
         @new-tab=${this._handleNewTab}
-      ></tab-bar>
+      ></ai-browser-tab-bar>
 
-      <controls-bar
+      <ai-browser-controls-bar
         .currentUrl=${this.currentUrl}
         .canGoBack=${this.canGoBack}
         .canGoForward=${this.canGoForward}
         @navigate=${this._handleNavigate}
         @navigate-action=${this._handleNavigateAction}
-      ></controls-bar>
+      ></ai-browser-controls-bar>
 
       <div class="canvas-container">
         <canvas
@@ -98,12 +98,12 @@ export class BrowserContainer extends LitElement {
           Loading...
         </div>
 
-        <dialog-component
+        <ai-browser-dialog
           .dialog=${this.dialog}
           .visible=${!!this.dialog}
           @dialog-accept=${this._handleDialogAccept}
           @dialog-dismiss=${this._handleDialogDismiss}
-        ></dialog-component>
+        ></ai-browser-dialog>
       </div>
     `;
   }
@@ -207,6 +207,6 @@ export class BrowserContainer extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'browser-container': BrowserContainer;
+    'ai-browser-container': BrowserContainer;
   }
 }

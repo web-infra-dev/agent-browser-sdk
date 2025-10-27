@@ -12,7 +12,7 @@ export interface TabMeta {
   isLoading: boolean;
 }
 
-@customElement('tab-component')
+@customElement('ai-browser-tab')
 export class TabComponent extends LitElement {
   static styles = css`
     :host {
@@ -201,6 +201,6 @@ export class TabComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tab-component': TabComponent;
+    'ai-browser-tab': TabComponent;
   }
 }

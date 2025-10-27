@@ -5,7 +5,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('controls-bar')
+@customElement('ai-browser-controls-bar')
 export class ControlsBar extends LitElement {
   static styles = css`
     :host {
@@ -68,6 +68,7 @@ export class ControlsBar extends LitElement {
 
     .url-bar:focus {
       background-color: #ffffff;
+      outline: 1px solid #3265cb;
     }
   `;
 
@@ -85,9 +86,11 @@ export class ControlsBar extends LitElement {
       const target = event.target as HTMLInputElement;
       const url = target.value.trim();
       if (url) {
-        this.dispatchEvent(new CustomEvent('navigate', {
-          detail: { url }
-        }));
+        this.dispatchEvent(
+          new CustomEvent('navigate', {
+            detail: { url },
+          }),
+        );
       }
     }
   }
@@ -100,8 +103,17 @@ export class ControlsBar extends LitElement {
           ?disabled=${!this.canGoBack}
           @click=${() => this._handleNavigation('back')}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="m12 19-7-7 7-7" />
             <path d="M19 12H5" />
           </svg>
@@ -111,8 +123,17 @@ export class ControlsBar extends LitElement {
           ?disabled=${!this.canGoForward}
           @click=${() => this._handleNavigation('forward')}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M5 12h14" />
             <path d="m12 5 7 7-7 7" />
           </svg>
@@ -121,8 +142,17 @@ export class ControlsBar extends LitElement {
           class="nav-btn"
           @click=${() => this._handleNavigation('refresh')}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
             <path d="M21 3v5h-5" />
           </svg>
@@ -139,14 +169,16 @@ export class ControlsBar extends LitElement {
   }
 
   private _handleNavigation(action: 'back' | 'forward' | 'refresh') {
-    this.dispatchEvent(new CustomEvent('navigate-action', {
-      detail: { action }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('navigate-action', {
+        detail: { action },
+      }),
+    );
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'controls-bar': ControlsBar;
+    'ai-browser-controls-bar': ControlsBar;
   }
 }

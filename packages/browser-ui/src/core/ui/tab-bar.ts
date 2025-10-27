@@ -5,9 +5,9 @@
 import { LitElement, html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { TabMeta } from './tab-component';
+import { TabMeta } from './tab';
 
-@customElement('tab-bar')
+@customElement('ai-browser-tab-bar')
 export class TabBar extends LitElement {
   static styles = css`
     :host {
@@ -36,19 +36,19 @@ export class TabBar extends LitElement {
       transition: background-color 0.15s ease;
     }
 
-    tab-component.active + .tab-divider {
+    ai-browser-tab.active + .tab-divider {
       background-color: transparent;
     }
 
-    .tab-divider:has(+ tab-component.active) {
+    .tab-divider:has(+ ai-browser-tab.active) {
       background: transparent;
     }
 
-    tab-component:hover + .tab-divider {
+    ai-browser-tab:hover + .tab-divider {
       background-color: transparent;
     }
 
-    .tab-divider:has(+ tab-component:hover) {
+    .tab-divider:has(+ ai-browser-tab:hover) {
       background: transparent;
     }
 
@@ -81,19 +81,17 @@ export class TabBar extends LitElement {
   tabs: TabMeta[] = [];
   activeTabId?: string;
 
-  private _newTabBtnClicked = false;
-
   render() {
     return html`
       <div class="tabs-container">
         ${this.tabs.map((tab, index) => [
           html`
-            <tab-component
+            <ai-browser-tab
               .tab=${tab}
               .isActive=${tab.id === this.activeTabId}
               @tab-activate=${this._handleTabActivate}
               @tab-close=${this._handleTabClose}
-            ></tab-component>
+            ></ai-browser-tab>
           `,
           // Add divider after each tab except the last one
           index < this.tabs.length - 1
@@ -130,6 +128,6 @@ export class TabBar extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tab-bar': TabBar;
+    'ai-browser-tab-bar': TabBar;
   }
 }
