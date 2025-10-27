@@ -174,10 +174,6 @@ function renderTabs() {
         return (node as Element).getAttribute('data-tab-id');
       }
 
-      if (node.nodeType === 1 && (node as Element).classList.contains('tab-divider')) {
-        return 'tab-divider';
-      }
-
       if (node) {
         return (
           (node as Element).getAttribute && (node as Element).getAttribute('id')
