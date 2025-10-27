@@ -35,6 +35,8 @@
     .tabs-container {
       display: flex;
       gap: 2px;
+      flex: 1;
+      min-width: 0;
     }
 
     .tab-divider {
@@ -69,8 +71,9 @@
       display: flex;
       box-sizing: border-box;
       height: 28px;
-      width: 220px;
-      min-width: 220px;
+      flex: 1;
+      flex-shrink: 0;
+      min-width: 30px;
       max-width: 220px;
       padding: 0 6px;
       border-radius: 8px;
@@ -131,7 +134,9 @@
       align-items: center;
       justify-content: center;
       width: 28px;
+      min-width: 28px;
       height: 28px;
+      flex-shrink: 0;
       padding: 0;
       border: none;
       border-radius: 14px;
