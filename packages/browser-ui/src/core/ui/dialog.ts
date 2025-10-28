@@ -17,6 +17,10 @@ export interface DialogMeta {
 export class DialogComponent extends LitElement {
   static styles = css`
     :host {
+      display: none;
+    }
+
+    :host([visible]) {
       position: absolute;
       top: 0;
       left: 0;
@@ -127,7 +131,7 @@ export class DialogComponent extends LitElement {
   @property({ type: Object })
   dialog?: DialogMeta;
 
-  @property({ type: Boolean })
+  @property({ type: Boolean, reflect: true })
   visible = false;
 
   @state()
@@ -138,16 +142,19 @@ export class DialogComponent extends LitElement {
       alert: 'Alert',
       confirm: 'Confirm',
       prompt: 'Prompt',
-      beforeunload: 'Confirm Leave'
+      beforeunload: 'Confirm Leave',
     };
     return this.dialog ? titles[this.dialog.type] || 'Dialog' : 'Dialog';
   }
 
   private _handleAccept() {
-    const inputValue = this.dialog?.type === 'prompt' ? this._inputValue : undefined;
-    this.dispatchEvent(new CustomEvent('dialog-accept', {
-      detail: { inputValue }
-    }));
+    const inputValue =
+      this.dialog?.type === 'prompt' ? this._inputValue : undefined;
+    this.dispatchEvent(
+      new CustomEvent('dialog-accept', {
+        detail: { inputValue },
+      }),
+    );
   }
 
   private _handleDismiss() {
@@ -170,7 +177,9 @@ export class DialogComponent extends LitElement {
     if (changedProperties.has('visible') && this.visible) {
       // Focus the input when dialog becomes visible
       setTimeout(() => {
-        const input = this.shadowRoot?.querySelector('.dialog-input') as HTMLInputElement;
+        const input = this.shadowRoot?.querySelector(
+          '.dialog-input',
+        ) as HTMLInputElement;
         if (input && this.dialog?.type === 'prompt') {
           input.focus();
         }
@@ -186,29 +195,38 @@ export class DialogComponent extends LitElement {
     return html`
       <div class="dialog-overlay">
         <div class="dialog-box" @click=${(e: Event) => e.stopPropagation()}>
-          <div class="dialog-header">
-            ${this._getDialogTitle()}
-          </div>
+          <div class="dialog-header">${this._getDialogTitle()}</div>
           <div class="dialog-content">
             <p class="dialog-message">${this.dialog.message}</p>
-            ${this.dialog.type === 'prompt' ? html`
-              <input
-                type="text"
-                class="dialog-input"
-                .value=${this._inputValue}
-                @input=${(e: Event) => this._inputValue = (e.target as HTMLInputElement).value}
-                @keypress=${this._handleInputKeypress}
-                placeholder="Enter value..."
-              />
-            ` : ''}
+            ${this.dialog.type === 'prompt'
+              ? html`
+                  <input
+                    type="text"
+                    class="dialog-input"
+                    .value=${this._inputValue}
+                    @input=${(e: Event) =>
+                      (this._inputValue = (e.target as HTMLInputElement).value)}
+                    @keypress=${this._handleInputKeypress}
+                    placeholder="Enter value..."
+                  />
+                `
+              : ''}
           </div>
           <div class="dialog-actions">
-            ${this.dialog.type !== 'alert' ? html`
-              <button class="dialog-btn dialog-btn-dismiss" @click=${this._handleDismiss}>
-                Cancel
-              </button>
-            ` : ''}
-            <button class="dialog-btn dialog-btn-accept" @click=${this._handleAccept}>
+            ${this.dialog.type !== 'alert'
+              ? html`
+                  <button
+                    class="dialog-btn dialog-btn-dismiss"
+                    @click=${this._handleDismiss}
+                  >
+                    Cancel
+                  </button>
+                `
+              : ''}
+            <button
+              class="dialog-btn dialog-btn-accept"
+              @click=${this._handleAccept}
+            >
               OK
             </button>
           </div>
