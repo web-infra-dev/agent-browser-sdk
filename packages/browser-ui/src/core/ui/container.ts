@@ -194,31 +194,39 @@ export class BrowserContainer extends LitElement {
     const canvas = this.getCanvas();
     if (!canvas) return;
 
-    canvas.addEventListener('mousemove', this._handleCanvasMouseEvent);
-    canvas.addEventListener('mousedown', this._handleCanvasMouseEvent);
-    canvas.addEventListener('mouseup', this._handleCanvasMouseEvent);
+    canvas.addEventListener('mousemove', this._handleMouse);
+    canvas.addEventListener('mousedown', this._handleMouse);
+    canvas.addEventListener('mouseup', this._handleMouse);
 
-    canvas.addEventListener('wheel', this._handleCanvasWheelEvent);
+    // Auto-focus events
+    canvas.addEventListener('mouseenter', this._handleMouseEnter);
+    canvas.addEventListener('mouseleave', this._handleMouseLeave);
 
-    canvas.addEventListener('keydown', this._handleCanvasKeyboardEvent);
-    canvas.addEventListener('keyup', this._handleCanvasKeyboardEvent);
+    canvas.addEventListener('wheel', this._handleWheel);
+
+    canvas.addEventListener('keydown', this._handleKeyboard);
+    canvas.addEventListener('keyup', this._handleKeyboard);
   }
 
   private _cleanupCanvasEvents() {
     const canvas = this.getCanvas();
     if (!canvas) return;
 
-    canvas.removeEventListener('mousemove', this._handleCanvasMouseEvent);
-    canvas.removeEventListener('mousedown', this._handleCanvasMouseEvent);
-    canvas.removeEventListener('mouseup', this._handleCanvasMouseEvent);
+    canvas.removeEventListener('mousemove', this._handleMouse);
+    canvas.removeEventListener('mousedown', this._handleMouse);
+    canvas.removeEventListener('mouseup', this._handleMouse);
 
-    canvas.removeEventListener('wheel', this._handleCanvasWheelEvent);
+    // Auto-focus events
+    canvas.removeEventListener('mouseenter', this._handleMouseEnter);
+    canvas.removeEventListener('mouseleave', this._handleMouseLeave);
 
-    canvas.removeEventListener('keydown', this._handleCanvasKeyboardEvent);
-    canvas.removeEventListener('keyup', this._handleCanvasKeyboardEvent);
+    canvas.removeEventListener('wheel', this._handleWheel);
+
+    canvas.removeEventListener('keydown', this._handleKeyboard);
+    canvas.removeEventListener('keyup', this._handleKeyboard);
   }
 
-  private _handleCanvasMouseEvent = (event: MouseEvent) => {
+  private _handleMouse = (event: MouseEvent) => {
     const canvas = this.getCanvas();
     if (!canvas) return;
 
@@ -241,7 +249,7 @@ export class BrowserContainer extends LitElement {
     );
   };
 
-  private _handleCanvasWheelEvent = (event: WheelEvent) => {
+  private _handleWheel = (event: WheelEvent) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -255,7 +263,7 @@ export class BrowserContainer extends LitElement {
     );
   };
 
-  private _handleCanvasKeyboardEvent = (event: KeyboardEvent) => {
+  private _handleKeyboard = (event: KeyboardEvent) => {
     console.log('KeyboardEvent', event.type);
 
     this.dispatchEvent(
@@ -268,6 +276,20 @@ export class BrowserContainer extends LitElement {
         },
       }),
     );
+  };
+
+  private _handleMouseEnter = () => {
+    const canvas = this.getCanvas();
+    if (canvas) {
+      canvas.focus();
+    }
+  };
+
+  private _handleMouseLeave = () => {
+    const canvas = this.getCanvas();
+    if (canvas) {
+      canvas.blur()
+    }
   };
 
   private _getMouseButton(buttonNumber: number): MouseButton {

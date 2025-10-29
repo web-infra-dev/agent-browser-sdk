@@ -98,6 +98,18 @@ export class BrowserUI {
   }
 
   /**
+   * Focus the canvas to enable keyboard input
+   */
+  focusCanvas(): void {
+    if (this.#browserContainer) {
+      const canvas = this.#browserContainer.getCanvas();
+      if (canvas) {
+        canvas.focus();
+      }
+    }
+  }
+
+  /**
    * Check if the BrowserUI is initialized
    */
   get isInitialized(): boolean {
@@ -295,6 +307,21 @@ export class BrowserUI {
   }
 
   #handleCanvasKeyboardEvent = async (e: Event): Promise<void> => {
+    const { type, key, code, modifiers } = (e as CustomEvent<KeyboardDetail>).detail;
+    console.log('Canvas keyboard event:', { type, key, code, modifiers });
+
+    const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
+    if (!activeTab) return;
+
+    // Handle keyboard events on the page
+    switch (type) {
+      case 'keydown':
+        await activeTab.page.keyboard.down(key);
+        break;
+      case 'keyup':
+        await activeTab.page.keyboard.up(key);
+        break;
+    }
   };
 
   #updateBrowserContainer(): void {
