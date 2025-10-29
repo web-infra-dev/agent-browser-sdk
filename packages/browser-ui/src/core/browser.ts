@@ -49,12 +49,16 @@ export class UIBrowser {
     return uiBrowser;
   }
 
-  private constructor(element: HTMLCanvasElement) {
+  constructor(element: HTMLCanvasElement) {
     this.#element = element;
   }
 
   get tabs(): UITabs {
     return this.#tabs!;
+  }
+
+  get envInfo() {
+    return this.#envInfo!;
   }
 
   async getBrowserMetaInfo() {

@@ -3,20 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { LitElement, html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import type { TabMeta } from './tab';
-import type { DialogMeta } from './dialog';
+import { customElement, property } from 'lit/decorators.js';
+import { getCdpMouseButton } from '../utils';
+
+import type { TabMeta, DialogMeta, MouseEventType, KeyboardEventType, MouseDetail, KeyboardDetail, WheelDetail } from '../../types';
 
 @customElement('ai-browser-container')
 export class BrowserContainer extends LitElement {
   static styles = css`
     :host {
       position: relative;
-      border-radius: 8px;
+      display: block;
       overflow: hidden;
       margin: 0 auto;
-      display: block;
       border: 0;
+      border-radius: 8px;
     }
 
     @media (min-resolution: 2dppx) {
@@ -26,12 +27,15 @@ export class BrowserContainer extends LitElement {
     }
 
     .canvas-container {
-      background-color: #fff;
       position: relative;
+      background-color: #fff;
     }
 
     canvas {
       display: block;
+    }
+    canvas:focus {
+      outline: none;
     }
   `;
 
@@ -59,41 +63,44 @@ export class BrowserContainer extends LitElement {
   @property({ type: Object })
   defaultViewport = { width: 1280, height: 1024 };
 
+  #canvas: HTMLCanvasElement | null = null;
+
   render() {
     return html`
       <ai-browser-tab-bar
         .tabs=${this.tabs}
         .activeTabId=${this.activeTabId}
         .disabled=${!!this.dialog}
-        @tab-activate=${this._handleTabActivate}
-        @tab-close=${this._handleTabClose}
-        @new-tab=${this._handleNewTab}
+        @tab-activate=${this.#handleTabActivate}
+        @tab-close=${this.#handleTabClose}
+        @new-tab=${this.#handleNewTab}
       ></ai-browser-tab-bar>
 
       <ai-browser-controls-bar
         .currentUrl=${this.currentUrl}
         .canGoBack=${this.canGoBack}
         .canGoForward=${this.canGoForward}
-        @navigate=${this._handleNavigate}
-        @navigate-action=${this._handleNavigateAction}
+        @navigate=${this.#handleNavigate}
+        @navigate-action=${this.#handleNavigateAction}
       ></ai-browser-controls-bar>
 
       <div class="canvas-container">
         <canvas
+          tabindex=${99}
           width=${this.defaultViewport.width}
           height=${this.defaultViewport.height}
         ></canvas>
         <ai-browser-dialog
           .dialog=${this.dialog}
           .visible=${!!this.dialog}
-          @dialog-accept=${this._handleDialogAccept}
-          @dialog-dismiss=${this._handleDialogDismiss}
+          @dialog-accept=${this.#handleDialogAccept}
+          @dialog-dismiss=${this.#handleDialogDismiss}
         ></ai-browser-dialog>
       </div>
     `;
   }
 
-  private _handleTabActivate(event: CustomEvent<{ tabId: string }>) {
+  #handleTabActivate(event: CustomEvent<{ tabId: string }>) {
     this.dispatchEvent(
       new CustomEvent('tab-activate', {
         detail: { tabId: event.detail.tabId },
@@ -101,7 +108,7 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleTabClose(event: CustomEvent<{ tabId: string }>) {
+  #handleTabClose(event: CustomEvent<{ tabId: string }>) {
     this.dispatchEvent(
       new CustomEvent('tab-close', {
         detail: { tabId: event.detail.tabId },
@@ -109,11 +116,11 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleNewTab() {
+  #handleNewTab() {
     this.dispatchEvent(new CustomEvent('new-tab'));
   }
 
-  private _handleNavigate(event: CustomEvent<{ url: string }>) {
+  #handleNavigate(event: CustomEvent<{ url: string }>) {
     this.dispatchEvent(
       new CustomEvent('navigate', {
         detail: { url: event.detail.url },
@@ -121,7 +128,7 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleNavigateAction(event: CustomEvent<{ action: string }>) {
+  #handleNavigateAction(event: CustomEvent<{ action: string }>) {
     this.dispatchEvent(
       new CustomEvent('navigate-action', {
         detail: { action: event.detail.action },
@@ -129,7 +136,7 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleDialogAccept(event: CustomEvent<{ inputValue?: string }>) {
+  #handleDialogAccept(event: CustomEvent<{ inputValue?: string }>) {
     this.dispatchEvent(
       new CustomEvent('dialog-accept', {
         detail: { inputValue: event.detail.inputValue },
@@ -137,38 +144,33 @@ export class BrowserContainer extends LitElement {
     );
   }
 
-  private _handleDialogDismiss() {
+  #handleDialogDismiss() {
     this.dispatchEvent(new CustomEvent('dialog-dismiss'));
-  }
-
-  /**
-   * Get the canvas element
-   */
-  getCanvas(): HTMLCanvasElement | null {
-    return this.shadowRoot?.querySelector('canvas') || null;
   }
 
   connectedCallback() {
     super.connectedCallback();
     // Wait for the component to be fully rendered
     setTimeout(() => {
-      this._canvasReady = true;
+      this.#canvas = this.shadowRoot?.querySelector('canvas') || null;
+      this.#setupCanvasEvents();
     }, 0);
   }
 
-  @state()
-  private _canvasReady = false;
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.#cleanupCanvasEvents();
+    this.#canvas = null;
+  }
 
-  /**
-   * Set loading state
-   */
+  getCanvas() {
+    return this.#canvas;
+  }
+
   setLoading(loading: boolean) {
     this.isLoading = loading;
   }
 
-  /**
-   * Update tabs data
-   */
   updateTabs(tabs: TabMeta[], activeTabId?: string) {
     this.tabs = tabs;
     if (activeTabId) {
@@ -176,28 +178,116 @@ export class BrowserContainer extends LitElement {
     }
   }
 
-  /**
-   * Update navigation state
-   */
   updateNavigation(url: string, canGoBack: boolean, canGoForward: boolean) {
     this.currentUrl = url;
     this.canGoBack = canGoBack;
     this.canGoForward = canGoForward;
   }
 
-  /**
-   * Show dialog
-   */
   showDialog(dialog: DialogMeta) {
     this.dialog = dialog;
   }
 
-  /**
-   * Hide dialog
-   */
   hideDialog() {
     this.dialog = undefined;
   }
+
+  #setupCanvasEvents() {
+    const canvas = this.#canvas;
+    if (!canvas) return;
+
+    canvas.addEventListener('mousemove', this.#handleMouse);
+    canvas.addEventListener('mousedown', this.#handleMouse);
+    canvas.addEventListener('mouseup', this.#handleMouse);
+
+    // Auto-focus events
+    canvas.addEventListener('mouseenter', this.#handleMouseEnter);
+    canvas.addEventListener('mouseleave', this.#handleMouseLeave);
+
+    canvas.addEventListener('wheel', this.#handleWheel);
+
+    canvas.addEventListener('keydown', this.#handleKeyboard);
+    canvas.addEventListener('keyup', this.#handleKeyboard);
+  }
+
+  #cleanupCanvasEvents() {
+    const canvas = this.#canvas;
+    if (!canvas) return;
+
+    canvas.removeEventListener('mousemove', this.#handleMouse);
+    canvas.removeEventListener('mousedown', this.#handleMouse);
+    canvas.removeEventListener('mouseup', this.#handleMouse);
+
+    // Auto-focus events
+    canvas.removeEventListener('mouseenter', this.#handleMouseEnter);
+    canvas.removeEventListener('mouseleave', this.#handleMouseLeave);
+
+    canvas.removeEventListener('wheel', this.#handleWheel);
+
+    canvas.removeEventListener('keydown', this.#handleKeyboard);
+    canvas.removeEventListener('keyup', this.#handleKeyboard);
+  }
+
+  #handleMouse = (event: MouseEvent) => {
+    const canvas = this.#canvas;
+    if (!canvas) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    this.dispatchEvent(
+      new CustomEvent<MouseDetail>('canvas-mouse-event', {
+        detail: {
+          type: event.type as MouseEventType,
+          x,
+          y,
+          button: getCdpMouseButton(event.button),
+        },
+      }),
+    );
+  };
+
+  #handleWheel = (event: WheelEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.dispatchEvent(
+      new CustomEvent<WheelDetail>('canvas-wheel-event', {
+        detail: {
+          deltaX: event.deltaX,
+          deltaY: event.deltaY,
+        },
+      }),
+    );
+  };
+
+  #handleKeyboard = (event: KeyboardEvent) => {
+    this.dispatchEvent(
+      new CustomEvent<KeyboardDetail>('canvas-keyboard-event', {
+        detail: {
+          type: event.type as KeyboardEventType,
+          key: event.key,
+          code: event.code,
+          altKey: event.altKey,
+          ctrlKey: event.ctrlKey,
+          metaKey: event.metaKey,
+          shiftKey: event.shiftKey,
+        },
+      }),
+    );
+  };
+
+  #handleMouseEnter = () => {
+    this.#canvas?.focus();
+  };
+
+  #handleMouseLeave = () => {
+    this.#canvas?.blur();
+  };
 }
 
 declare global {
