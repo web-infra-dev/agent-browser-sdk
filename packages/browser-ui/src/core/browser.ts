@@ -57,6 +57,10 @@ export class UIBrowser {
     return this.#tabs!;
   }
 
+  get envInfo() {
+    return this.#envInfo!;
+  }
+
   async getBrowserMetaInfo() {
     if (!this.#pptrBrowser) {
       throw new Error('Browser not initialized');

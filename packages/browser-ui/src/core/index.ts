@@ -5,12 +5,11 @@
 
 import { KeyboardDetail, MouseDetail, WheelDetail } from '../types';
 import { UIBrowser } from './browser';
-// Import all UI components to ensure they are registered
 import './ui';
-
 import { BrowserContainer } from './ui';
+import { getMacOSHotkey } from './utils';
 
-import type { ConnectOptions } from 'puppeteer-core';
+import type { ConnectOptions, KeyInput } from 'puppeteer-core';
 
 export interface BrowserUIOptions {
   /** Root element to mount the browser UI */
@@ -295,8 +294,8 @@ export class BrowserUI {
   }
 
   #handleCanvasKeyboardEvent = async (e: Event): Promise<void> => {
-    const { type, key, code, modifiers } = (e as CustomEvent<KeyboardDetail>).detail;
-    console.log('Canvas keyboard event:', { type, key, code, modifiers });
+    const detail = (e as CustomEvent<KeyboardDetail>).detail;
+    const { type, code } = detail;
 
     const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
     if (!activeTab) return;
@@ -304,10 +303,19 @@ export class BrowserUI {
     // Handle keyboard events on the page
     switch (type) {
       case 'keydown':
-        await activeTab.page.keyboard.down(key);
+        if (this.#canvasBrowser!.envInfo.osName === 'macOS') {
+          const hotkey = getMacOSHotkey(detail);
+
+          if (hotkey) {
+            await activeTab.page.keyboard.down(hotkey.key, { commands: [hotkey.commands] });
+          } else {
+            await activeTab.page.keyboard.down(code as KeyInput);
+          }
+        }
+        await activeTab.page.keyboard.down(code as KeyInput);
         break;
       case 'keyup':
-        await activeTab.page.keyboard.up(key);
+        await activeTab.page.keyboard.up(code as KeyInput);
         break;
     }
   };

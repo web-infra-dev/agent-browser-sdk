@@ -3,12 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { LitElement, html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
+import { getCdpMouseButton } from '../utils';
 
-import type { MouseEventType, KeyboardEventType, MouseDetail, KeyboardDetail, WheelDetail } from '../../types';
-import type { TabMeta } from './tab';
-import type { DialogMeta } from './dialog';
-import { MouseButton } from 'puppeteer-core';
+import type { TabMeta, DialogMeta, MouseEventType, KeyboardEventType, MouseDetail, KeyboardDetail, WheelDetail } from '../../types';
 
 @customElement('ai-browser-container')
 export class BrowserContainer extends LitElement {
@@ -247,7 +245,7 @@ export class BrowserContainer extends LitElement {
           type: event.type as MouseEventType,
           x,
           y,
-          button: this.#getMouseButton(event.button),
+          button: getCdpMouseButton(event.button),
         },
       }),
     );
@@ -268,15 +266,16 @@ export class BrowserContainer extends LitElement {
   };
 
   #handleKeyboard = (event: KeyboardEvent) => {
-    console.log('KeyboardEvent', event.type);
-
     this.dispatchEvent(
       new CustomEvent<KeyboardDetail>('canvas-keyboard-event', {
         detail: {
           type: event.type as KeyboardEventType,
           key: event.key,
           code: event.code,
-          modifiers: this.#getModifiers(event),
+          altKey: event.altKey,
+          ctrlKey: event.ctrlKey,
+          metaKey: event.metaKey,
+          shiftKey: event.shiftKey,
         },
       }),
     );
@@ -289,32 +288,6 @@ export class BrowserContainer extends LitElement {
   #handleMouseLeave = () => {
     this.#canvas?.blur();
   };
-
-  #getMouseButton(buttonNumber: number): MouseButton {
-    switch (buttonNumber) {
-      case 0:
-        return 'left';
-      case 1:
-        return 'middle';
-      case 2:
-        return 'right';
-      case 3:
-        return 'back';
-      case 4:
-        return 'forward';
-      default:
-        return 'left';
-    }
-  }
-
-  #getModifiers(event: MouseEvent | KeyboardEvent): number {
-    let modifiers = 0;
-    if (event.altKey) modifiers |= 1; // Alt
-    if (event.ctrlKey) modifiers |= 2; // Control
-    if (event.metaKey) modifiers |= 4; // Meta
-    if (event.shiftKey) modifiers |= 8; // Shift
-    return modifiers;
-  }
 }
 
 declare global {

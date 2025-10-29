@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { MouseButton } from 'puppeteer-core';
 
-export type MouseEventType = 'mousemove' | 'mousedown' | 'mouseup'
+export type MouseEventType = 'mousemove' | 'mousedown' | 'mouseup';
 
 export type KeyboardEventType = 'keydown' | 'keyup';
 
@@ -20,5 +25,8 @@ export interface KeyboardDetail {
   type: KeyboardEventType;
   key: string;
   code: string;
-  modifiers: number;
+  altKey: boolean;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  shiftKey: boolean;
 }
