@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { KeyboardDetail, MouseDetail, WheelDetail } from '../types';
 import { UIBrowser } from './browser';
 // Import all UI components to ensure they are registered
 import './ui';
@@ -163,6 +164,11 @@ export class BrowserUI {
     // Dialog events
     this.#browserContainer.addEventListener('dialog-accept', this.#handleDialogAccept);
     this.#browserContainer.addEventListener('dialog-dismiss', this.#handleDialogDismiss);
+
+    // Canvas events
+    this.#browserContainer.addEventListener('canvas-mouse-event', this.#handleCanvasMouseEvent);
+    this.#browserContainer.addEventListener('canvas-wheel-event', this.#handleCanvasWheelEvent);
+    this.#browserContainer.addEventListener('canvas-keyboard-event', this.#handleCanvasKeyboardEvent);
   }
 
   #removeEventListeners(): void {
@@ -170,13 +176,23 @@ export class BrowserUI {
       return;
     }
 
+    // Tab events
     this.#browserContainer.removeEventListener('tab-activate', this.#handleTabActivate);
     this.#browserContainer.removeEventListener('tab-close', this.#handleTabClose);
     this.#browserContainer.removeEventListener('new-tab', this.#handleNewTab);
+
+    // Navigation events
     this.#browserContainer.removeEventListener('navigate', this.#handleNavigate);
     this.#browserContainer.removeEventListener('navigate-action', this.#handleNavigateAction);
+
+    // Dialog events
     this.#browserContainer.removeEventListener('dialog-accept', this.#handleDialogAccept);
     this.#browserContainer.removeEventListener('dialog-dismiss', this.#handleDialogDismiss);
+
+    // Canvas events
+    this.#browserContainer.removeEventListener('canvas-mouse-event', this.#handleCanvasMouseEvent);
+    this.#browserContainer.removeEventListener('canvas-wheel-event', this.#handleCanvasWheelEvent);
+    this.#browserContainer.removeEventListener('canvas-keyboard-event', this.#handleCanvasKeyboardEvent);
   }
 
   #handleTabActivate = async (e: Event): Promise<void> => {
@@ -245,6 +261,40 @@ export class BrowserUI {
     if (success) {
       this.#browserContainer!.hideDialog();
     }
+  };
+
+  #handleCanvasMouseEvent = async (e: Event): Promise<void> => {
+    const { type, x, y, button } = (e as CustomEvent<MouseDetail>)
+      .detail;
+
+    const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
+    if (!activeTab) return;
+
+    switch (type) {
+      case 'mousemove':
+        await activeTab.page.mouse.move(x, y);
+        break;
+      case 'mousedown':
+        await activeTab.page.mouse.down({ button });
+        break;
+      case 'mouseup':
+        await activeTab.page.mouse.up({ button });
+        break;
+      default:
+        break;
+    }
+  };
+
+  #handleCanvasWheelEvent = async (e: Event): Promise<void> => {
+    const { deltaX, deltaY } = (e as CustomEvent<WheelDetail>).detail;
+
+    const activeTab = this.#canvasBrowser!.tabs.getActiveTab();
+    if (!activeTab) return;
+    
+    await activeTab.page.mouse.wheel({ deltaX, deltaY });
+  }
+
+  #handleCanvasKeyboardEvent = async (e: Event): Promise<void> => {
   };
 
   #updateBrowserContainer(): void {

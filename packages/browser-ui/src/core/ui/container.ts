@@ -4,8 +4,11 @@
  */
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+
+import type { MouseEventType, KeyboardEventType, MouseDetail, KeyboardDetail, WheelDetail } from '../../types';
 import type { TabMeta } from './tab';
 import type { DialogMeta } from './dialog';
+import { MouseButton } from 'puppeteer-core';
 
 @customElement('ai-browser-container')
 export class BrowserContainer extends LitElement {
@@ -145,9 +148,6 @@ export class BrowserContainer extends LitElement {
     this.dispatchEvent(new CustomEvent('dialog-dismiss'));
   }
 
-  /**
-   * Get the canvas element
-   */
   getCanvas(): HTMLCanvasElement | null {
     return this.shadowRoot?.querySelector('canvas') || null;
   }
@@ -156,23 +156,19 @@ export class BrowserContainer extends LitElement {
     super.connectedCallback();
     // Wait for the component to be fully rendered
     setTimeout(() => {
-      this._canvasReady = true;
+      this._setupCanvasEvents();
     }, 0);
   }
 
-  @state()
-  private _canvasReady = false;
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._cleanupCanvasEvents();
+  }
 
-  /**
-   * Set loading state
-   */
   setLoading(loading: boolean) {
     this.isLoading = loading;
   }
 
-  /**
-   * Update tabs data
-   */
   updateTabs(tabs: TabMeta[], activeTabId?: string) {
     this.tabs = tabs;
     if (activeTabId) {
@@ -180,27 +176,124 @@ export class BrowserContainer extends LitElement {
     }
   }
 
-  /**
-   * Update navigation state
-   */
   updateNavigation(url: string, canGoBack: boolean, canGoForward: boolean) {
     this.currentUrl = url;
     this.canGoBack = canGoBack;
     this.canGoForward = canGoForward;
   }
 
-  /**
-   * Show dialog
-   */
   showDialog(dialog: DialogMeta) {
     this.dialog = dialog;
   }
 
-  /**
-   * Hide dialog
-   */
   hideDialog() {
     this.dialog = undefined;
+  }
+
+  private _setupCanvasEvents() {
+    const canvas = this.getCanvas();
+    if (!canvas) return;
+
+    canvas.addEventListener('mousemove', this._handleCanvasMouseEvent);
+    canvas.addEventListener('mousedown', this._handleCanvasMouseEvent);
+    canvas.addEventListener('mouseup', this._handleCanvasMouseEvent);
+
+    canvas.addEventListener('wheel', this._handleCanvasWheelEvent);
+
+    canvas.addEventListener('keydown', this._handleCanvasKeyboardEvent);
+    canvas.addEventListener('keyup', this._handleCanvasKeyboardEvent);
+  }
+
+  private _cleanupCanvasEvents() {
+    const canvas = this.getCanvas();
+    if (!canvas) return;
+
+    canvas.removeEventListener('mousemove', this._handleCanvasMouseEvent);
+    canvas.removeEventListener('mousedown', this._handleCanvasMouseEvent);
+    canvas.removeEventListener('mouseup', this._handleCanvasMouseEvent);
+
+    canvas.removeEventListener('wheel', this._handleCanvasWheelEvent);
+
+    canvas.removeEventListener('keydown', this._handleCanvasKeyboardEvent);
+    canvas.removeEventListener('keyup', this._handleCanvasKeyboardEvent);
+  }
+
+  private _handleCanvasMouseEvent = (event: MouseEvent) => {
+    const canvas = this.getCanvas();
+    if (!canvas) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    this.dispatchEvent(
+      new CustomEvent<MouseDetail>('canvas-mouse-event', {
+        detail: {
+          type: event.type as MouseEventType,
+          x,
+          y,
+          button: this._getMouseButton(event.button),
+        },
+      }),
+    );
+  };
+
+  private _handleCanvasWheelEvent = (event: WheelEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.dispatchEvent(
+      new CustomEvent<WheelDetail>('canvas-wheel-event', {
+        detail: {
+          deltaX: event.deltaX,
+          deltaY: event.deltaY,
+        },
+      }),
+    );
+  };
+
+  private _handleCanvasKeyboardEvent = (event: KeyboardEvent) => {
+    console.log('KeyboardEvent', event.type);
+
+    this.dispatchEvent(
+      new CustomEvent<KeyboardDetail>('canvas-keyboard-event', {
+        detail: {
+          type: event.type as KeyboardEventType,
+          key: event.key,
+          code: event.code,
+          modifiers: this._getModifiers(event),
+        },
+      }),
+    );
+  };
+
+  private _getMouseButton(buttonNumber: number): MouseButton {
+    switch (buttonNumber) {
+      case 0:
+        return 'left';
+      case 1:
+        return 'middle';
+      case 2:
+        return 'right';
+      case 3:
+        return 'back';
+      case 4:
+        return 'forward';
+      default:
+        return 'left';
+    }
+  }
+
+  private _getModifiers(event: MouseEvent | KeyboardEvent): number {
+    let modifiers = 0;
+    if (event.altKey) modifiers |= 1; // Alt
+    if (event.ctrlKey) modifiers |= 2; // Control
+    if (event.metaKey) modifiers |= 4; // Meta
+    if (event.shiftKey) modifiers |= 8; // Shift
+    return modifiers;
   }
 }
 
