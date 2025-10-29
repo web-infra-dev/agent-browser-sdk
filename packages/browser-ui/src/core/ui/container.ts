@@ -65,6 +65,8 @@ export class BrowserContainer extends LitElement {
   @property({ type: Object })
   defaultViewport = { width: 1280, height: 1024 };
 
+  #canvas: HTMLCanvasElement | null = null;
+
   render() {
     return html`
       <ai-browser-tab-bar
@@ -148,14 +150,11 @@ export class BrowserContainer extends LitElement {
     this.dispatchEvent(new CustomEvent('dialog-dismiss'));
   }
 
-  getCanvas(): HTMLCanvasElement | null {
-    return this.shadowRoot?.querySelector('canvas') || null;
-  }
-
   connectedCallback() {
     super.connectedCallback();
     // Wait for the component to be fully rendered
     setTimeout(() => {
+      this.#canvas = this.shadowRoot?.querySelector('canvas') || null;
       this._setupCanvasEvents();
     }, 0);
   }
@@ -163,6 +162,11 @@ export class BrowserContainer extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._cleanupCanvasEvents();
+    this.#canvas = null;
+  }
+
+  getCanvas() {
+    return this.#canvas;
   }
 
   setLoading(loading: boolean) {
@@ -191,7 +195,7 @@ export class BrowserContainer extends LitElement {
   }
 
   private _setupCanvasEvents() {
-    const canvas = this.getCanvas();
+    const canvas = this.#canvas;
     if (!canvas) return;
 
     canvas.addEventListener('mousemove', this._handleMouse);
@@ -209,7 +213,7 @@ export class BrowserContainer extends LitElement {
   }
 
   private _cleanupCanvasEvents() {
-    const canvas = this.getCanvas();
+    const canvas = this.#canvas;
     if (!canvas) return;
 
     canvas.removeEventListener('mousemove', this._handleMouse);
@@ -227,7 +231,7 @@ export class BrowserContainer extends LitElement {
   }
 
   private _handleMouse = (event: MouseEvent) => {
-    const canvas = this.getCanvas();
+    const canvas = this.#canvas;
     if (!canvas) return;
 
     event.preventDefault();
@@ -279,17 +283,11 @@ export class BrowserContainer extends LitElement {
   };
 
   private _handleMouseEnter = () => {
-    const canvas = this.getCanvas();
-    if (canvas) {
-      canvas.focus();
-    }
+    this.#canvas?.focus();
   };
 
   private _handleMouseLeave = () => {
-    const canvas = this.getCanvas();
-    if (canvas) {
-      canvas.blur()
-    }
+    this.#canvas?.blur();
   };
 
   private _getMouseButton(buttonNumber: number): MouseButton {

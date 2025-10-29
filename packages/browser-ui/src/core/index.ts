@@ -98,18 +98,6 @@ export class BrowserUI {
   }
 
   /**
-   * Focus the canvas to enable keyboard input
-   */
-  focusCanvas(): void {
-    if (this.#browserContainer) {
-      const canvas = this.#browserContainer.getCanvas();
-      if (canvas) {
-        canvas.focus();
-      }
-    }
-  }
-
-  /**
    * Check if the BrowserUI is initialized
    */
   get isInitialized(): boolean {
