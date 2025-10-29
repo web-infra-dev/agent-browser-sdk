@@ -151,8 +151,6 @@ export class BrowserUI {
       return;
     }
 
-    const tabs = this.#canvasBrowser.tabs;
-
     // Tab events
     this.#browserContainer.addEventListener('tab-activate', this.#handleTabActivate);
     this.#browserContainer.addEventListener('tab-close', this.#handleTabClose);
