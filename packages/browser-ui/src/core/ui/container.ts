@@ -6,7 +6,8 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getCdpMouseButton } from '../utils';
 
-import type { TabMeta, DialogMeta, MouseEventType, KeyboardEventType, MouseDetail, KeyboardDetail, WheelDetail } from '../../types';
+import type { TabMeta, DialogMeta, MouseEventType, KeyboardEventType, MouseDetail, KeyboardDetail, WheelDetail, ClipboardDetail } from '../../types';
+import './clipboard';
 
 @customElement('ai-browser-container')
 export class BrowserContainer extends LitElement {
@@ -96,6 +97,10 @@ export class BrowserContainer extends LitElement {
           @dialog-accept=${this.#handleDialogAccept}
           @dialog-dismiss=${this.#handleDialogDismiss}
         ></ai-browser-dialog>
+
+        <ai-browser-clipboard
+          @clipboard-change=${this.#handleClipboardChange}
+        ></ai-browser-clipboard>
       </div>
     `;
   }
@@ -146,6 +151,14 @@ export class BrowserContainer extends LitElement {
 
   #handleDialogDismiss() {
     this.dispatchEvent(new CustomEvent('dialog-dismiss'));
+  }
+
+  #handleClipboardChange(event: CustomEvent<ClipboardDetail>) {
+    this.dispatchEvent(
+      new CustomEvent<ClipboardDetail>('clipboard-change', {
+        detail: { content: event.detail.content },
+      }),
+    );
   }
 
   connectedCallback() {

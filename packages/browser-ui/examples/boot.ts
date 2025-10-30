@@ -13,7 +13,7 @@ async function main() {
   const browser = await puppeteer.launch({
     executablePath:
       '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    headless: false,
+    headless: true,
     defaultViewport: {
       width: 900,
       height: 900,
