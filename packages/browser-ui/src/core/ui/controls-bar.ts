@@ -4,7 +4,11 @@
  */
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { NavigationEventDetail, NavigationActionEventDetail } from '../../types';
+
+import type {
+  NavigationEventDetail,
+  NavigationActionEventDetail,
+} from '../../types';
 
 @customElement('ai-browser-controls-bar')
 export class ControlsBar extends LitElement {
@@ -90,6 +94,8 @@ export class ControlsBar extends LitElement {
         this.dispatchEvent(
           new CustomEvent<NavigationEventDetail>('navigate', {
             detail: { url },
+            bubbles: true,
+            composed: true,
           }),
         );
       }
@@ -173,6 +179,8 @@ export class ControlsBar extends LitElement {
     this.dispatchEvent(
       new CustomEvent<NavigationActionEventDetail>('navigate-action', {
         detail: { action },
+        bubbles: true,
+        composed: true,
       }),
     );
   }

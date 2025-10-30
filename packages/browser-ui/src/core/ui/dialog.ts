@@ -147,12 +147,19 @@ export class DialogComponent extends LitElement {
     this.dispatchEvent(
       new CustomEvent<DialogAcceptEventDetail>('dialog-accept', {
         detail: { inputValue },
+        bubbles: true,
+        composed: true,
       }),
     );
   }
 
   #handleDismiss() {
-    this.dispatchEvent(new CustomEvent('dialog-dismiss'));
+    this.dispatchEvent(
+      new CustomEvent('dialog-dismiss', {
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   #handleInputKeypress(event: KeyboardEvent) {
