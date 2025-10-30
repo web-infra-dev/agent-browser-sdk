@@ -30,3 +30,7 @@ export interface KeyboardDetail {
   metaKey: boolean;
   shiftKey: boolean;
 }
+
+export interface ClipboardDetail {
+  content: string;
+}
