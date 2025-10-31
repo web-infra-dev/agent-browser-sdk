@@ -16,7 +16,6 @@ import {
   type TabsState,
   type TabsOperationTracker,
   type TabsOptions,
-  type NavigationOptions,
   type DialogMeta,
 } from '../types/tabs';
 
