@@ -27,6 +27,14 @@ export interface BrowserUIOptions {
 }
 
 export class BrowserUI {
+
+  static async create(options: BrowserUIOptions): Promise<BrowserUI> {
+    const browserUI =  new BrowserUI(options);
+    await browserUI.#init();
+
+    return browserUI;
+  }
+
   #options: BrowserUIOptions;
   #browserContainer?: BrowserContainer;
   #canvasBrowser?: UIBrowser;
@@ -37,7 +45,7 @@ export class BrowserUI {
     this.#options = options;
   }
 
-  async init(): Promise<void> {
+  async #init() {
     if (this.#isInitialized) {
       throw new Error('BrowserUI is already initialized');
     }
