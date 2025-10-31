@@ -17,7 +17,7 @@ import {
   type TabsOperationTracker,
   type TabsOptions,
   type NavigationOptions,
-  DialogMeta,
+  type DialogMeta,
 } from '../types/tabs';
 
 export class Tabs<T extends Tab = Tab> {
