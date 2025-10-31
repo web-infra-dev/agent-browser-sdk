@@ -8,4 +8,4 @@ export * from './types';
 export * from './env';
 export * from './tabs';
 export * from './hotkey';
-export * from './browser';
+export * from './browser/browser';

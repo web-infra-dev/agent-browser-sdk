@@ -5,43 +5,13 @@
 
 import { launch, connect } from 'puppeteer-core';
 import { BrowserFinder } from '@agent-infra/browser-finder';
-import { Tabs } from './tabs/tabs';
-import { getEnvInfo } from './env';
+import { Tabs } from '../tabs/tabs';
+import { getEnvInfo } from '../env';
+import { BaseBrowser } from './base';
 
-import type {
-  Browser as pptrBrowser,
-  LaunchOptions,
-  ConnectOptions,
-  Viewport,
-} from 'puppeteer-core';
-import { EnvInfo } from './types';
+import type { LaunchOptions } from 'puppeteer-core';
 
-const MAX_RETRIES = 5;
-const INITIAL_BACKOFF = 2000;
-
-export class Browser {
-  #pptrBrowser?: pptrBrowser;
-  #tabs?: Tabs;
-
-  #wsEndpoint = '';
-  #envInfo?: EnvInfo;
-  // https://pptr.dev/api/puppeteer.viewport
-  #defaultViewport: Viewport = {
-    // pptr default width and height are 800 x 600,
-    // but nowadays there are basically no such devices.
-    // 1280 x 1024 is AIO sandbox default size.
-    width: 1280,
-    height: 1024,
-    // Setting deviceScaleFactor value to 0 will reset this value to the system default.
-    deviceScaleFactor: 0,
-    isMobile: false, // deafault is false in pptr
-    isLandscape: false, // deafault is false in pptr
-    hasTouch: false, // deafault is false in pptr
-  };
-
-  #isIntentionalDisconnect: boolean = false;
-  #reconnectAttempts: number = 0;
-
+export class Browser extends BaseBrowser<Tabs> {
   /**
    * Create a browser instance (launch or connect based on options)
    */
@@ -51,45 +21,22 @@ export class Browser {
     return browser;
   }
 
-  constructor() {}
+  constructor() {
+    super();
+  }
 
   // #region public methods
 
-  get tabs(): Tabs {
-    return this.#tabs!;
-  }
-
-  async getBrowserMetaInfo() {
-    if (!this.#pptrBrowser) {
-      throw new Error('Browser not initialized');
-    }
-
-    const userAgent = await this.#pptrBrowser.userAgent();
-
-    return {
-      envInfo: this.#envInfo!,
-      userAgent,
-      viewport: this.#defaultViewport,
-      wsEndpoint: this.#wsEndpoint,
-    };
-  }
-
-  async disconnect(): Promise<void> {
-    this.#isIntentionalDisconnect = true;
-
-    await this.#pptrBrowser?.disconnect();
-  }
-
   async close() {
-    this.#isIntentionalDisconnect = true;
+    this.isIntentionalDisconnect = true;
 
-    await this.#tabs?.destroy();
-    await this.#pptrBrowser?.close();
+    await this.tabs?.destroy();
+    await this.pptrBrowser?.close();
   }
 
   // #endregion
 
-  // #region private methods
+  // #region launch & connect
 
   async #init(options: LaunchOptions): Promise<void> {
     const processedOptions = this.#processOptions(options);
@@ -103,20 +50,7 @@ export class Browser {
 
   #processOptions(options: LaunchOptions): LaunchOptions {
     const processedOptions = { ...options };
-    const setDefaultViewport = (viewport?: Viewport | null) => {
-      if (!viewport) {
-        return this.#defaultViewport;
-      }
 
-      if (typeof viewport === 'object') {
-        this.#defaultViewport = {
-          ...this.#defaultViewport,
-          ...viewport,
-        };
-      }
-
-      return this.#defaultViewport;
-    };
     const findBrowserPath = () => {
       const finder = new BrowserFinder();
       const browsers = ['chrome', 'edge'] as const;
@@ -138,6 +72,7 @@ export class Browser {
 
       return finder.findBrowser(foundBrowser).path;
     };
+
     const setArgs = () => {
       const args = processedOptions.args || [];
       // https://github.com/GoogleChrome/chrome-launcher/blob/main/docs/chrome-flags-for-tools.md
@@ -148,7 +83,7 @@ export class Browser {
       ];
       // window-size includes some Chrome UI components (such as tabs, URL input box, etc.),
       // so an additional 90 pixels should be added to the viewport height.
-      const windowSizeArg = `--window-size=${this.#defaultViewport.width},${this.#defaultViewport.height + 90}`;
+      const windowSizeArg = `--window-size=${this.defaultViewport.width},${this.defaultViewport.height + 90}`;
 
       // args
       for (const arg of defaultArgs) {
@@ -177,7 +112,7 @@ export class Browser {
     };
 
     // 1.Set default viewport
-    processedOptions.defaultViewport = setDefaultViewport(
+    processedOptions.defaultViewport = this.setDefaultViewport(
       options.defaultViewport,
     );
 
@@ -206,85 +141,80 @@ export class Browser {
     return processedOptions;
   }
 
-  async #launch(options: LaunchOptions): Promise<void> {
-    this.#pptrBrowser = await launch(options);
-
-    if (!this.#pptrBrowser) {
-      throw new Error('Puppeteer browser not launch');
-    }
-
-    this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-
-    this.#envInfo = await getEnvInfo(this.#pptrBrowser);
-    this.#tabs = await Tabs.create(this.#pptrBrowser, {
-      viewport: this.#defaultViewport,
-      envInfo: this.#envInfo,
-    });
-    this.#setupAutoReconnect();
-  }
-
-  async #connect(options: LaunchOptions): Promise<void> {
-    this.#pptrBrowser = await connect(options);
-
-    if (!this.#pptrBrowser) {
-      throw new Error('Puppeteer browser not connect');
-    }
-
-    this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-
-    this.#envInfo = await getEnvInfo(this.#pptrBrowser);
-    this.#tabs = await Tabs.create(this.#pptrBrowser, {
-      viewport: this.#defaultViewport,
-      envInfo: this.#envInfo,
-    });
-    this.#setupAutoReconnect();
-  }
-
   #isConnectMode(options: LaunchOptions): boolean {
     return !!(options.browserWSEndpoint || options.browserURL);
   }
 
-  #setupAutoReconnect(): void {
-    this.#pptrBrowser!.on('disconnected', () => {
-      if (this.#isIntentionalDisconnect) {
-        return;
-      }
+  async #launch(options: LaunchOptions): Promise<void> {
+    this.pptrBrowser = await launch(options);
 
-      this.#attemptReconnect();
+    if (!this.pptrBrowser) {
+      throw new Error('Puppeteer browser not launch');
+    }
+
+    this.wsEndpoint = this.pptrBrowser.wsEndpoint();
+
+    this._envInfo = await getEnvInfo(this.pptrBrowser);
+    this._tabs = await Tabs.create(this.pptrBrowser, {
+      viewport: this.defaultViewport,
+      envInfo: this._envInfo,
     });
+    this.setupAutoReconnect();
   }
 
-  async #attemptReconnect(): Promise<void> {
-    if (this.#reconnectAttempts >= MAX_RETRIES) {
+  async #connect(options: LaunchOptions): Promise<void> {
+    this.pptrBrowser = await connect(options);
+
+    if (!this.pptrBrowser) {
+      throw new Error('Puppeteer browser not connect');
+    }
+
+    this.wsEndpoint = this.pptrBrowser.wsEndpoint();
+
+    this._envInfo = await getEnvInfo(this.pptrBrowser);
+    this._tabs = await Tabs.create(this.pptrBrowser, {
+      viewport: this.defaultViewport,
+      envInfo: this._envInfo,
+    });
+    this.setupAutoReconnect();
+  }
+
+  protected async attemptReconnect(): Promise<void> {
+    if (this.reconnectAttempts >= 5) {
       console.error('Max reconnect attempts reached. Giving up reconnecting');
       return;
     }
-    if (!this.#wsEndpoint) {
+    if (!this.wsEndpoint) {
       console.error('No wsEndpoint found. Cannot reconnect');
       return;
     }
 
-    const delay = INITIAL_BACKOFF * this.#reconnectAttempts;
-    this.#reconnectAttempts++;
+    const delay = this.getReconnectDelay();
     await new Promise((resolve) => setTimeout(resolve, delay));
+    this.incrementReconnectAttempts();
 
     try {
-      const connectOptions: ConnectOptions = {
-        browserWSEndpoint: this.#wsEndpoint,
-        defaultViewport: this.#defaultViewport,
+      const connectOptions = {
+        browserWSEndpoint: this.wsEndpoint,
+        defaultViewport: this.defaultViewport,
       };
-      this.#pptrBrowser = await connect(connectOptions);
+      this.pptrBrowser = await connect(connectOptions);
 
-      this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-
-      this.#tabs = await Tabs.create(this.#pptrBrowser, {
-        viewport: this.#defaultViewport,
-        envInfo: this.#envInfo!,
+      this.wsEndpoint = this.pptrBrowser.wsEndpoint();
+      this._tabs = await Tabs.create(this.pptrBrowser, {
+        viewport: this.defaultViewport,
+        envInfo: this._envInfo!,
       });
-      this.#reconnectAttempts = 0;
+
+      const activeTab = this.tabs.getActiveTab();
+      if (activeTab) {
+        await activeTab.active();
+      }
+
+      await this.handleReconnectSuccess();
     } catch (error) {
-      if (this.#reconnectAttempts < MAX_RETRIES) {
-        this.#attemptReconnect();
+      if (this.reconnectAttempts < 5) {
+        this.attemptReconnect();
       } else {
         console.error('Failed to reconnect after max retries:', error);
       }

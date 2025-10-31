@@ -3,41 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
-import { getEnvInfo } from '@agent-infra/browser/web';
+import { getEnvInfo, BaseBrowser } from '@agent-infra/browser/web';
 import { UITabs } from './tabs';
 
-import type { EnvInfo } from '@agent-infra/browser/web';
-
-import type { Browser, Viewport, ConnectOptions } from 'puppeteer-core';
-
-const MAX_RETRIES = 5;
-const INITIAL_BACKOFF = 2000;
+import type { Browser, ConnectOptions } from 'puppeteer-core';
 
 /**
  * https://pptr.dev/guides/running-puppeteer-in-the-browser
  */
-export class UIBrowser {
-  #element: HTMLCanvasElement;
-  #wsEndpoint?: string;
-  #pptrBrowser?: Browser;
-  #tabs?: UITabs;
-  #envInfo?: EnvInfo;
-  // https://pptr.dev/api/puppeteer.viewport
-  #defaultViewport: Viewport = {
-    // pptr default width and height are 800 x 600,
-    // but nowadays there are basically no such devices.
-    // 1280 x 1024 is AIO sandbox default size.
-    width: 1280,
-    height: 1024,
-    // Setting deviceScaleFactor value to 0 will reset this value to the system default.
-    deviceScaleFactor: 0,
-    isMobile: false, // deafault is false in pptr
-    isLandscape: false, // deafault is false in pptr
-    hasTouch: false, // deafault is false in pptr
-  };
-
-  #isIntentionalDisconnect: boolean = false;
-  #reconnectAttempts: number = 0;
+export class UIBrowser extends BaseBrowser<UITabs> {
+  private element: HTMLCanvasElement;
 
   static async create(
     element: HTMLCanvasElement,
@@ -50,41 +25,18 @@ export class UIBrowser {
   }
 
   constructor(element: HTMLCanvasElement) {
-    this.#element = element;
-  }
-
-  get tabs(): UITabs {
-    return this.#tabs!;
-  }
-
-  get envInfo() {
-    return this.#envInfo!;
-  }
-
-  async getBrowserMetaInfo() {
-    if (!this.#pptrBrowser) {
-      throw new Error('Browser not initialized');
-    }
-
-    const userAgent = await this.#pptrBrowser.userAgent();
-
-    return {
-      envInfo: this.#envInfo!,
-      userAgent,
-      viewport: this.#defaultViewport,
-      wsEndpoint: this.#wsEndpoint,
-    };
+    super();
+    this.element = element;
   }
 
   async disconnect(): Promise<void> {
-    this.#isIntentionalDisconnect = true;
+    this.isIntentionalDisconnect = true;
 
     document.removeEventListener(
       'visibilitychange',
       this.#handleVisibilityChange,
     );
-    await this.#tabs?.destroy();
-    await this.#pptrBrowser?.disconnect();
+    await super.disconnect();
   }
 
   async #init(options: ConnectOptions) {
@@ -95,20 +47,6 @@ export class UIBrowser {
 
   #processOptions(options: ConnectOptions): ConnectOptions {
     const processedOptions = { ...options };
-    const setDefaultViewport = (viewport?: Viewport | null) => {
-      if (!viewport) {
-        return this.#defaultViewport;
-      }
-
-      if (typeof viewport === 'object') {
-        this.#defaultViewport = {
-          ...this.#defaultViewport,
-          ...viewport,
-        };
-      }
-
-      return this.#defaultViewport;
-    };
 
     // 1.Validate browser type
     if (processedOptions.protocol === 'webDriverBiDi') {
@@ -125,7 +63,7 @@ export class UIBrowser {
     }
 
     // 3.Set default viewport
-    processedOptions.defaultViewport = setDefaultViewport(
+    processedOptions.defaultViewport = this.setDefaultViewport(
       options.defaultViewport,
     );
 
@@ -134,89 +72,75 @@ export class UIBrowser {
 
   async #connect(options: ConnectOptions): Promise<void> {
     // @ts-ignore
-    this.#pptrBrowser = (await connect(options)) as unknown as Browser;
+    this.pptrBrowser = (await connect(options)) as unknown as Browser;
 
-    if (!this.#pptrBrowser) {
+    if (!this.pptrBrowser) {
       throw new Error('Failed to connect to Puppeteer browser');
     }
 
-    this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-
-    this.#envInfo = await getEnvInfo(this.#pptrBrowser);
-    this.#tabs = await UITabs.UICreate(this.#pptrBrowser, this.#element, {
+    this.wsEndpoint = this.pptrBrowser.wsEndpoint();
+    this._envInfo = await getEnvInfo(this.pptrBrowser);
+    this._tabs = await UITabs.UICreate(this.pptrBrowser, this.element, {
       viewport: options.defaultViewport!,
-      envInfo: this.#envInfo,
+      envInfo: this._envInfo,
     });
 
-    this.#setupAutoReconnect();
+    this.setupAutoReconnect();
+    this.#setupVisibilityHandler();
   }
 
-  #setupAutoReconnect(): void {
-    // Listen for browser disconnection
-    this.#pptrBrowser!.on('disconnected', () => {
-      // console.log('pptrBrowser disconnected');
-
-      if (this.#isIntentionalDisconnect) {
-        return;
-      }
-      this.#attemptReconnect();
-    });
+  #setupVisibilityHandler(): void {
     document.addEventListener('visibilitychange', this.#handleVisibilityChange);
   }
 
   #handleVisibilityChange = (): void => {
     if (
       document.visibilityState === 'visible' &&
-      !this.#isIntentionalDisconnect
+      !this.isIntentionalDisconnect
     ) {
-      // console.log(
-      //   'handleVisibilityChange',
-      //   !!this.#pptrBrowser,
-      //   !!this.#pptrBrowser?.connected,
-      // );
-      if (!this.#pptrBrowser?.connected) {
-        this.#attemptReconnect();
+      if (!this.pptrBrowser?.connected) {
+        this.attemptReconnect();
       }
     }
   };
 
-  async #attemptReconnect(): Promise<void> {
-    if (this.#reconnectAttempts >= MAX_RETRIES) {
+  protected async attemptReconnect(): Promise<void> {
+    if (this.reconnectAttempts >= 5) {
       console.error('Max reconnect attempts reached. Giving up reconnecting');
       return;
     }
-    if (!this.#wsEndpoint) {
+    if (!this.wsEndpoint) {
       console.error('No wsEndpoint found. Cannot reconnect');
       return;
     }
 
-    const delay = INITIAL_BACKOFF * this.#reconnectAttempts;
-    this.#reconnectAttempts++;
+    const delay = this.getReconnectDelay();
     await new Promise((resolve) => setTimeout(resolve, delay));
+    this.incrementReconnectAttempts();
 
     try {
-      this.#pptrBrowser = (await connect({
-        browserWSEndpoint: this.#wsEndpoint,
-        defaultViewport: this.#defaultViewport,
-      })) as unknown as Browser;
+      const connectOptions = {
+        browserWSEndpoint: this.wsEndpoint,
+        defaultViewport: this.defaultViewport,
+      };
+      this.pptrBrowser = (await connect(connectOptions)) as unknown as Browser;
 
-      this.#wsEndpoint = this.#pptrBrowser.wsEndpoint();
-
-      this.#tabs = await UITabs.UICreate(this.#pptrBrowser, this.#element, {
-        viewport: this.#defaultViewport,
-        envInfo: this.#envInfo!,
+      this.wsEndpoint = this.pptrBrowser.wsEndpoint();
+      this._tabs = await UITabs.UICreate(this.pptrBrowser, this.element, {
+        viewport: this.defaultViewport,
+        envInfo: this._envInfo!,
       });
 
       // Restore active tab's ScreencastRenderer after reconnection
-      const activeTab = this.#tabs.getActiveTab();
+      const activeTab = this.tabs.getActiveTab();
       if (activeTab) {
         await activeTab.active();
       }
 
-      this.#reconnectAttempts = 0;
+      await this.handleReconnectSuccess();
     } catch (error) {
-      if (this.#reconnectAttempts < MAX_RETRIES) {
-        this.#attemptReconnect();
+      if (this.reconnectAttempts < 5) {
+        this.attemptReconnect();
       } else {
         console.error('Failed to reconnect after max retries:', error);
       }
