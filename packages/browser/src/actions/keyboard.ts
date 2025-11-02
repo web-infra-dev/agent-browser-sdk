@@ -9,10 +9,10 @@ import {
   MAC_SYSTEM_HOTKEY_MAP,
   KEY_ABBR_TO_STANDARD_MAP,
   KEY_LOW_TO_STANDARD_MAP,
-} from '../hotkey/key-map';
+} from './key-map';
 
 import type { KeyInput, Page } from 'puppeteer-core';
-import { EnvInfo, KeyboardOptions, KeyOrHotKeyInput } from '../types';
+import type { EnvInfo, KeyboardOptions, KeyOrHotKeyInput } from '../types';
 
 export class Keyboard {
   #page: Page;
