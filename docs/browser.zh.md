@@ -236,8 +236,6 @@ interface EnvInfo {
 
 获取所有标签页的当前状态快照。
 
-标签页状态快照。
-
 ```typescript
 interface TabsState {
   tabs: Map<string, TabMeta>;
@@ -271,19 +269,19 @@ interface DialogMeta {
 
 #### `cookies(): Promise<Cookie[]>`
 
-获取所有 cookies。可直接参考 [Browser.cookies|Puppeteer](https://pptr.dev/api/puppeteer.browser.cookies)
+获取所有 cookies。可直接参考 [Browser.cookies | Puppeteer](https://pptr.dev/api/puppeteer.browser.cookies)。
 
 #### `setCookie(...cookies: CookieData[]): Promise<void>`
 
-设置一个或多个 cookies。可直接参考 [Browser.setcookie|Puppeteer](https://pptr.dev/api/puppeteer.browser.setcookie)
+设置一个或多个 cookies。可直接参考 [Browser.setcookie | Puppeteer](https://pptr.dev/api/puppeteer.browser.setcookie)。
 
 #### `deleteCookie(...cookies: Cookie[]): Promise<void>`
 
-删除一个或多个 cookies。可直接参考 [Browser.deletecookie|Puppeteer](https://pptr.dev/api/puppeteer.browser.deletecookie)
+删除一个或多个 cookies。可直接参考 [Browser.deletecookie | Puppeteer](https://pptr.dev/api/puppeteer.browser.deletecookie)。
 
 #### `deleteMatchingCookies(...filters: DeleteCookiesRequest[]): Promise<void>`
 
-批量删除匹配指定条件的 cookies。可直接参考 [Browser.deleteMatchingCookies|Puppeteer](https://pptr.dev/api/puppeteer.browser.deleteMatchingCookies)
+批量删除匹配指定条件的 cookies。可直接参考 [Browser.deleteMatchingCookies | Puppeteer](https://pptr.dev/api/puppeteer.browser.deleteMatchingCookies)。
 
 <br />
 
@@ -295,19 +293,19 @@ interface DialogMeta {
 
 #### `goto(url: string, options?: NavigationOptions): Promise<void>`
 
-导航到指定 URL。可直接参考 [Page.goto|Puppeteer](https://pptr.dev/api/puppeteer.page.goto)
+导航到指定 URL。可直接参考 [Page.goto | Puppeteer](https://pptr.dev/api/puppeteer.page.goto)。
 
 #### `goBack(options?: NavigationOptions): Promise<boolean>`
 
-导航到上一页。可直接参考 [Page.goBack|Puppeteer](https://pptr.dev/api/puppeteer.page.goBack)
+导航到上一页。可直接参考 [Page.goBack | Puppeteer](https://pptr.dev/api/puppeteer.page.goBack)。
 
 #### `goForward(options?: NavigationOptions): Promise<boolean>`
 
-导航到下一页。可直接参考 [Page.goForward|Puppeteer](https://pptr.dev/api/puppeteer.page.goForward)
+导航到下一页。可直接参考 [Page.goForward | Puppeteer](https://pptr.dev/api/puppeteer.page.goForward)。
 
 #### `reload(options?: NavigationOptions): Promise<void>`
 
-重新加载当前页面。可直接参考 [Page.reload|Puppeteer](https://pptr.dev/api/puppeteer.page.reload)
+重新加载当前页面。可直接参考 [Page.reload | Puppeteer](https://pptr.dev/api/puppeteer.page.reload)。
 
 <br />
 
@@ -319,19 +317,19 @@ interface DialogMeta {
 
 组合键类似于 `Ctrl+C`，`Ctrl+V`，类型为 `string`，单个按键之间用 `+` 连接。不用刻意区分操作系统（例如对于复制这个快捷键来说，Win/Linux 上使用 `Ctrl`，macOS 上使用 `Command`），内部已经做了兜底适配。
 
-非组合键可直接参考 [Keyboard.reload|Puppeteer](https://pptr.dev/api/puppeteer.keyboard.press)
+非组合键可直接参考 [Keyboard.reload | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.press)。
 
 #### `down(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<void>`
 
-按下按键（不释放）。可参考 [Keyboard.down|Puppeteer](https://pptr.dev/api/puppeteer.keyboard.down)
+按下按键（不释放）。可参考 [Keyboard.down | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.down)。
 
 #### `up(key: KeyOrHotKeyInput): Promise<void>`
 
-释放按键。可参考 [Keyboard.up|Puppeteer](https://pptr.dev/api/puppeteer.keyboard.up)
+释放按键。可参考 [Keyboard.up | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.up)。
 
 #### `type(text: string, options?: KeyboardOptions): Promise<void>`
 
-输入文本。可参考 [Keyboard.type|Puppeteer](https://pptr.dev/api/puppeteer.keyboard.type)
+输入文本。可参考 [Keyboard.type | Puppeteer](https://pptr.dev/api/puppeteer.keyboard.type)。
 
 <br />
 
@@ -339,15 +337,15 @@ interface DialogMeta {
 
 #### `click(x: number, y: number, options?: MouseClickOptions): Promise<void>`
 
-在指定坐标点击鼠标。可直接参考 [Mouse.click|Puppeteer](https://pptr.dev/api/puppeteer.mouse.click)
+在指定坐标点击鼠标。可直接参考 [Mouse.click | Puppeteer](https://pptr.dev/api/puppeteer.mouse.click)。
 
 #### `move(x: number, y: number, options?: MouseMoveOptions): Promise<void>`
 
-移动鼠标到指定坐标。可直接参考 [Mouse.move|Puppeteer](https://pptr.dev/api/puppeteer.mouse.move)
+移动鼠标到指定坐标。可直接参考 [Mouse.move | Puppeteer](https://pptr.dev/api/puppeteer.mouse.move)。
 
 #### `drag(start: Point, end: Point, options?: object): Promise<void>`
 
-拖拽操作。可直接参考 [Mouse.dragAndDrop|Puppeteer](https://pptr.dev/api/puppeteer.mouse.dragAndDrop)
+拖拽操作。可直接参考 [Mouse.dragAndDrop | Puppeteer](https://pptr.dev/api/puppeteer.mouse.dragAndDrop)。
 
 #### `scroll(direction: ScrollDirection, delta: number): Promise<void>`
 
