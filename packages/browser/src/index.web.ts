@@ -7,5 +7,5 @@ import './polyfills';
 export * from './types';
 export * from './env';
 export * from './tabs';
-export * from './hotkey';
+export * from './actions';
 export * from './browser/base';

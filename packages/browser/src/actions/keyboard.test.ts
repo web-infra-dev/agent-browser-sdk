@@ -3,26 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Hotkey } from './index';
+import { Keyboard } from './keyboard';
 import type { Page } from 'puppeteer-core';
-import type { OSType, BrowserType } from '../types/env';
+import type { EnvInfo } from '../types';
 
 // Mock delay module
 vi.mock('delay', () => ({
   default: vi.fn().mockResolvedValue(undefined),
 }));
 
-describe('Hotkey', () => {
+describe('Keyboard', () => {
   let mockPage: Page;
   let mockKeyboard: {
     down: ReturnType<typeof vi.fn>;
     up: ReturnType<typeof vi.fn>;
+    type: ReturnType<typeof vi.fn>;
+    sendCharacter: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     mockKeyboard = {
       down: vi.fn().mockResolvedValue(undefined),
       up: vi.fn().mockResolvedValue(undefined),
+      type: vi.fn().mockResolvedValue(undefined),
+      sendCharacter: vi.fn().mockResolvedValue(undefined),
     };
 
     mockPage = {
@@ -34,12 +38,12 @@ describe('Hotkey', () => {
 
   describe('constructor', () => {
     it('should create instance with correct OS and browser', () => {
-      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome'});
-      expect(hotkey).toBeInstanceOf(Hotkey);
+      const keyboard = new Keyboard(mockPage, { osName: 'macOS', browserName: 'Chrome', browserVersion: '140' });
+      expect(keyboard).toBeInstanceOf(Keyboard);
     });
 
     it('should work with different OS and browser combinations', () => {
-      const combinations: Array<[OSType, BrowserType]> = [
+      const combinations: Array<[EnvInfo['osName'], EnvInfo['browserName']]> = [
         ['Windows', 'Chrome'],
         ['Linux', 'Firefox'],
         ['macOS', 'Edge'],
@@ -47,17 +51,25 @@ describe('Hotkey', () => {
       ];
 
       combinations.forEach(([os, browser]) => {
-        const hotkey = new Hotkey({ osName: os, browserName: browser });
-        expect(hotkey).toBeInstanceOf(Hotkey);
+        const keyboard = new Keyboard(mockPage, {
+          osName: os,
+          browserName: browser,
+          browserVersion: '140',
+        });
+        expect(keyboard).toBeInstanceOf(Keyboard);
       });
     });
   });
 
   describe('press method', () => {
     it('should handle simple key combinations', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'ctrl+c');
+      await keyboard.press('ctrl+c');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
       expect(mockKeyboard.down).toHaveBeenCalledWith('C');
@@ -66,18 +78,26 @@ describe('Hotkey', () => {
     });
 
     it('should handle abbreviations correctly', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'ctrl+esc');
+      await keyboard.press('ctrl+esc');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
       expect(mockKeyboard.down).toHaveBeenCalledWith('Escape');
     });
 
     it('should handle multiple modifier keys', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'ctrl+shift+z');
+      await keyboard.press('ctrl+shift+z');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
       expect(mockKeyboard.down).toHaveBeenCalledWith('Shift');
@@ -88,36 +108,52 @@ describe('Hotkey', () => {
     });
 
     it('should handle case insensitive input', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'CTRL+C');
+      await keyboard.press('CTRL+C');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
       expect(mockKeyboard.down).toHaveBeenCalledWith('C');
     });
 
     it('should handle custom delay option', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
       const delay = await import('delay');
 
-      await hotkey.press(mockPage, 'ctrl+c', { delay: 200 });
+      await keyboard.press('ctrl+c', { delay: 200 });
 
       expect(delay.default).toHaveBeenCalledWith(200);
     });
 
     it('should use default delay when no options provided', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
       const delay = await import('delay');
 
-      await hotkey.press(mockPage, 'ctrl+c');
+      await keyboard.press('ctrl+c');
 
-      expect(delay.default).toHaveBeenCalledWith(100);
+      expect(delay.default).toHaveBeenCalledWith(0);
     });
 
     it('should throw error for unsupported keys', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await expect(hotkey.press(mockPage, 'unsupported+key')).rejects.toThrow(
+      await expect(keyboard.press('unsupported+key')).rejects.toThrow(
         'Unsupported key: unsupported',
       );
     });
@@ -125,9 +161,13 @@ describe('Hotkey', () => {
 
   describe('macOS Chrome special handling', () => {
     it('should use CDP commands for common macOS shortcuts', async () => {
-      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome'});
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'macOS',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'cmd+c');
+      await keyboard.press('cmd+c');
 
       // Should use CDP command instead of regular key press
       expect(mockKeyboard.down).toHaveBeenCalledWith('KeyC', {
@@ -138,9 +178,13 @@ describe('Hotkey', () => {
     });
 
     it('should handle Control key as Meta on macOS', async () => {
-      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'macOS',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'ctrl+c');
+      await keyboard.press('ctrl+c');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('KeyC', {
         commands: ['Copy'],
@@ -148,7 +192,11 @@ describe('Hotkey', () => {
     });
 
     it('should handle various macOS shortcuts', async () => {
-      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'macOS',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
       const shortcuts = [
         { input: 'cmd+a', expectedCommand: 'SelectAll' },
@@ -170,7 +218,7 @@ describe('Hotkey', () => {
       for (const { input, expectedCommand } of shortcuts) {
         vi.clearAllMocks();
 
-        await hotkey.press(mockPage, input);
+        await keyboard.press(input);
 
         expect(mockKeyboard.down).toHaveBeenCalledWith(expect.any(String), {
           commands: [expectedCommand],
@@ -179,9 +227,13 @@ describe('Hotkey', () => {
     });
 
     it('should fallback to regular key press for unsupported macOS shortcuts', async () => {
-      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'macOS',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'cmd+f');
+      await keyboard.press('cmd+f');
 
       // Should fallback to regular key press
       expect(mockKeyboard.down).toHaveBeenCalledWith('Meta');
@@ -191,9 +243,13 @@ describe('Hotkey', () => {
     });
 
     it('should not use CDP commands for non-macOS systems', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'ctrl+c');
+      await keyboard.press('ctrl+c');
 
       // Should use regular key press
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
@@ -204,9 +260,13 @@ describe('Hotkey', () => {
     });
 
     it('should not use CDP commands for non-Chrome browsers on macOS', async () => {
-      const hotkey = new Hotkey({ osName: 'macOS', browserName: 'Firefox' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'macOS',
+        browserName: 'Firefox',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'cmd+c');
+      await keyboard.press('cmd+c');
 
       // Should use regular key press
       expect(mockKeyboard.down).toHaveBeenCalledWith('Meta');
@@ -219,16 +279,24 @@ describe('Hotkey', () => {
 
   describe('key formatting', () => {
     it('should handle spaces in hotkey string', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'ctrl + c');
+      await keyboard.press('ctrl + c');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
       expect(mockKeyboard.down).toHaveBeenCalledWith('C');
     });
 
     it('should handle different key abbreviations', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
       const keyMappings = [
         { input: 'cmd+c', expectedKeys: ['Meta', 'C'] },
@@ -250,7 +318,7 @@ describe('Hotkey', () => {
       for (const { input, expectedKeys } of keyMappings) {
         vi.clearAllMocks();
 
-        await hotkey.press(mockPage, input);
+        await keyboard.press(input);
 
         expectedKeys.forEach((key) => {
           expect(mockKeyboard.down).toHaveBeenCalledWith(key);
@@ -259,18 +327,26 @@ describe('Hotkey', () => {
     });
 
     it('should handle function keys', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'ctrl+f1');
+      await keyboard.press('ctrl+f1');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
       expect(mockKeyboard.down).toHaveBeenCalledWith('F1');
     });
 
     it('should handle number keys', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'ctrl+1');
+      await keyboard.press('ctrl+1');
 
       expect(mockKeyboard.down).toHaveBeenCalledWith('Control');
       expect(mockKeyboard.down).toHaveBeenCalledWith('1');
@@ -279,9 +355,13 @@ describe('Hotkey', () => {
 
   describe('key press sequence', () => {
     it('should press keys in correct order and release in reverse order', async () => {
-      const hotkey = new Hotkey({ osName: 'Windows', browserName: 'Chrome' });
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
 
-      await hotkey.press(mockPage, 'ctrl+shift+a');
+      await keyboard.press('ctrl+shift+a');
 
       // Check press order
       expect(mockKeyboard.down).toHaveBeenNthCalledWith(1, 'Control');
@@ -292,6 +372,96 @@ describe('Hotkey', () => {
       expect(mockKeyboard.up).toHaveBeenNthCalledWith(1, 'A');
       expect(mockKeyboard.up).toHaveBeenNthCalledWith(2, 'Shift');
       expect(mockKeyboard.up).toHaveBeenNthCalledWith(3, 'Control');
+    });
+  });
+
+  describe('down method', () => {
+    it('should press keys down in correct order', async () => {
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
+
+      await keyboard.down('ctrl+alt+a');
+
+      expect(mockKeyboard.down).toHaveBeenNthCalledWith(1, 'Control');
+      expect(mockKeyboard.down).toHaveBeenNthCalledWith(2, 'Alt');
+      expect(mockKeyboard.down).toHaveBeenNthCalledWith(3, 'A');
+      expect(mockKeyboard.up).not.toHaveBeenCalled();
+    });
+
+    it('should handle macOS Chrome CDP commands for down method', async () => {
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'macOS',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
+
+      await keyboard.down('cmd+c');
+
+      expect(mockKeyboard.down).toHaveBeenCalledWith('KeyC', {
+        commands: ['Copy'],
+      });
+      expect(mockKeyboard.up).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('up method', () => {
+    it('should release keys in reverse order', async () => {
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
+
+      await keyboard.up('ctrl+shift+a');
+
+      expect(mockKeyboard.down).not.toHaveBeenCalled();
+      expect(mockKeyboard.up).toHaveBeenNthCalledWith(1, 'A');
+      expect(mockKeyboard.up).toHaveBeenNthCalledWith(2, 'Shift');
+      expect(mockKeyboard.up).toHaveBeenNthCalledWith(3, 'Control');
+    });
+  });
+
+  describe('type method', () => {
+    it('should use keyboard.type for short text with delay', async () => {
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
+
+      await keyboard.type('hello', { delay: 50 });
+
+      expect(mockKeyboard.type).toHaveBeenCalledWith('hello', { delay: 50 });
+      expect(mockKeyboard.sendCharacter).not.toHaveBeenCalled();
+    });
+
+    it('should use sendCharacter for long text', async () => {
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
+
+      await keyboard.type('this is a very long text that should use sendCharacter method instead of type method');
+
+      expect(mockKeyboard.type).not.toHaveBeenCalled();
+      expect(mockKeyboard.sendCharacter).toHaveBeenCalledWith('this is a very long text that should use sendCharacter method instead of type method');
+    });
+
+    it('should use sendCharacter for text without delay', async () => {
+      const keyboard = new Keyboard(mockPage, {
+        osName: 'Windows',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
+
+      await keyboard.type('hello world');
+
+      expect(mockKeyboard.type).not.toHaveBeenCalled();
+      expect(mockKeyboard.sendCharacter).toHaveBeenCalledWith('hello world');
     });
   });
 });

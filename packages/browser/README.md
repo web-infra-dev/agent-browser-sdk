@@ -12,26 +12,6 @@ pnpm install @agent-infra/browser
 
 ## Quick Start
 
-```typescript
-import { Hotkey } from '@agent-infra/browser';
-import puppeteer from 'puppeteer-core';
-
-const browser = await puppeteer.launch();
-const page = await browser.newPage();
-
-// Initialize hotkey handler
-const hotkey = new Hotkey({ osName: 'macOS', browserName: 'chrome' });
-
-// Simulate Ctrl+C (Copy)
-await hotkey.press(page, 'ctrl+c');
-
-// Simulate Cmd+V (Paste on macOS)
-await hotkey.press(page, 'cmd+v');
-
-// With custom delay
-await hotkey.press(page, 'ctrl+a', { delay: 200 });
-```
-
 ## API Reference
 
 ### Env
