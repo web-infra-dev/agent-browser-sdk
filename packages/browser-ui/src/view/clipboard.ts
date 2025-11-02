@@ -6,7 +6,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
-import type { ClipboardDetail } from '../../types';
+import type { ClipboardDetail } from '../types';
 
 @customElement('ai-browser-clipboard')
 export class ClipboardWidget extends LitElement {

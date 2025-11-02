@@ -4,7 +4,7 @@
  */
 
 import type { KeyInput, MouseButton } from 'puppeteer-core';
-import type { KeyboardDetail } from '../../types';
+import type { KeyboardDetail } from '../types';
 import { OSType } from '@agent-infra/browser/web';
 
 export function getCdpMouseButton(buttonNumber: number): MouseButton {

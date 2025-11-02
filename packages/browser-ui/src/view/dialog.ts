@@ -5,7 +5,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { DialogMeta, DialogAcceptEventDetail } from '../../types';
+import type { DialogMeta, DialogAcceptEventDetail } from '../types';
 
 @customElement('ai-browser-dialog')
 export class DialogComponent extends LitElement {
