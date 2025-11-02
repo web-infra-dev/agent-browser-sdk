@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { BrowserUI, BrowserUIOptions } from './browser-ui';
+export { BrowserUI } from './controller';
