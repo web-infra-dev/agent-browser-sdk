@@ -5,7 +5,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { TabMeta, TabEventDetail } from '../../types';
+import type { TabMeta, TabEventDetail } from '../types';
 
 @customElement('ai-browser-tab')
 export class TabComponent extends LitElement {

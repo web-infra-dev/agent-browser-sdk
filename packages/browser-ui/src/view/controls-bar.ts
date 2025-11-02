@@ -8,7 +8,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type {
   NavigationEventDetail,
   NavigationActionEventDetail,
-} from '../../types';
+} from '../types';
 
 @customElement('ai-browser-controls-bar')
 export class ControlsBar extends LitElement {

@@ -17,7 +17,7 @@ import type {
   NavigationEventDetail,
   NavigationActionEventDetail,
   DialogAcceptEventDetail,
-} from '../types';
+} from './types';
 
 export interface BrowserUIOptions {
   /** Root element to mount the browser UI */

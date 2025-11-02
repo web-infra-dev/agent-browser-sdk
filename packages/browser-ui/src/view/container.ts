@@ -17,7 +17,7 @@ import type {
   WheelDetail,
   ClipboardDetail,
   DialogAcceptEventDetail,
-} from '../../types';
+} from '../types';
 
 @customElement('ai-browser-container')
 export class BrowserContainer extends LitElement {
