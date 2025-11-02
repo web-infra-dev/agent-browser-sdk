@@ -1,6 +1,4 @@
-# @agent-infra/browser
-
-## 前言
+# 前言
 
 @agent-infra/browser 是一套基于 puppeteer 的专为 browser agent 提供基础功能的 sdk。
 
@@ -10,9 +8,9 @@ puppeteer 是一款非常优秀的浏览器自动化控制软件，它封装了�
 
 <br />
 
-## 快速开始
+# 快速开始
 
-### 安装
+## 安装
 
 ```bash
 npm install @agent-infra/browser
@@ -20,7 +18,7 @@ npm install @agent-infra/browser
 
 <br />
 
-### 基本用法
+## 基本用法
 
 下面是一个最简单的使用 demo，Browser 将会寻找电脑上已经安装的 chrome or edge 浏览器，然后会启动一个受控的浏览器实例，然后通过 CDP 控制它执行一些操作。
 
@@ -45,7 +43,7 @@ await browser.close();
 
 <br />
 
-### 标签页管理
+## 标签页管理
 
 不同于 puppeteer，@agent-infra/browser 抽象了一套 tabs 的概念，然后提供了相关的 API 去管理它。
 
@@ -65,7 +63,7 @@ await browser.closeTab(tabId);
 
 <br />
 
-### Tab 内导航
+## Tab 内导航
 
 对于 activeTab，用户可以通过相关 API 做导航操作。
 
@@ -87,7 +85,7 @@ await tab.reload();
 
 <br />
 
-### 鼠标和键盘操作
+## 鼠标和键盘操作
 
 在鼠标操作上，目前 @agent-infra/browser 封装了一套 vision 方案（也就是通过坐标去执行相关 action），后续我们会支持基于 DOM 的解决方案。
 
@@ -115,7 +113,7 @@ await tab.keyboard.press('ctrl+v'); // 粘贴
 
 <br />
 
-### Cookie 管理
+## Cookie 管理
 
 cookie 操作我们保留了和 puppeteer 一样的 API，更详细的用法可参考 [Cookies|Puppeteer](https://pptr.dev/guides/cookies)。
 
@@ -139,23 +137,23 @@ await browser.deleteMatchingCookies({ domain: 'example.com' });
 
 <br />
 
-## API
+# API
 
-### Browser 类
+## Browser 类
 
 浏览器主类，主要提供 tabs 管理和 cookie 注入等功能。
 
 <br />
 
-#### 生命周期
+### 生命周期
 
-##### `Browser.create(options?: LaunchOptions): Promise<Browser>`
+#### `Browser.create(options?: LaunchOptions): Promise<Browser>`
 
 创建并初始化浏览器实例。LaunchOptions 就是 puppeteer 的[启动参数类型](https://pptr.dev/browsers-api/browsers.launchoptions)，但是又有一些不一样的地方：
 
-puppeteer可以通过 [`puppeteer.launch`](https://pptr.dev/api/puppeteer.launchoptions) 中的 `args` 参数控制Chrome的启动行为。关于具体的逻辑和参数，请参考源代码 [puppeteer - ChromeLauncher.ts](https://github.com/puppeteer/puppeteer/blob/main/packages/puppeteer-core/src/node/ChromeLauncher.ts)。
+> puppeteer可以通过 [`puppeteer.launch`](https://pptr.dev/api/puppeteer.launchoptions) 中的 `args` 参数控制 Chrome 的启动行为。关于具体的逻辑和参数，请参考源代码 [puppeteer - ChromeLauncher.ts](https://github.com/puppeteer/puppeteer/blob/main/packages/puppeteer-core/src/node/ChromeLauncher.ts)。
 
-除了 puppeteer-core 的内置参数外，调用 `Browser.create` 还默认添加了以下参数，以优化浏览器的使用体验：
+1. 除了 puppeteer-core 的内置参数外，调用 `Browser.create` 还默认添加了以下参数，以优化浏览器的使用体验：
 
 | 参数                                                             | 描述                                       |
 | --------------------------------------------------------------- | ------------------------------------------ |
@@ -164,28 +162,32 @@ puppeteer可以通过 [`puppeteer.launch`](https://pptr.dev/api/puppeteer.launch
 | `--ash-no-nudges`                                               | 避免蓝色气泡“用户教育”提示                     |
 | `--window-size=defaultViewport.width,defaultViewport.height+90` | 设置初始窗口大小。                            |
 
-以下 puppeteer-core 参数默认被忽略：
+<br />
+
+2. 以下 puppeteer-core 参数默认被忽略：
 
 | 参数                   | 描述                                                      |
 | --------------------- | --------------------------------------------------------- |
 | `--enable-automation` | 避免在浏览器启动时出现“Chrome 正在被自动化软件控制”的提示         |
 
-默认的 ViewPort 设置为 `{ width: 1280, height: 1024 }`，目的是为了和 AIO Sandbox 的默认浏览器尺寸保持一致。
+<br />
+
+3. 默认的 ViewPort 设置为 `{ width: 1280, height: 1024 }`，目的是为了和 AIO Sandbox 的默认浏览器尺寸保持一致。
 
 
-##### `disconnect(): Promise<void>`
+#### `disconnect(): Promise<void>`
 
 断开浏览器连接（不关闭浏览器进程）。
 
-##### `close(): Promise<void>`
+#### `close(): Promise<void>`
 
 销毁 Browser 实例，并关闭启动的浏览器进程。
 
 <br />
 
-#### Meta 信息
+### Meta 信息
 
-##### `getBrowserMetaInfo(): Promise<object>`
+#### `getBrowserMetaInfo(): Promise<object>`
 
 获取浏览器元信息，返回类型如下：
 
@@ -208,29 +210,29 @@ interface EnvInfo {
 
 <br />
 
-#### Tabs 管理
+### Tabs 管理
 
-##### `close(): Promise<void>`
+#### `close(): Promise<void>`
 
 关闭浏览器并清理所有资源。
 
-##### `getActiveTab(): Tab | null`
+#### `getActiveTab(): Tab | null`
 
 获取当前活跃的标签页。
 
-##### `createTab(): Promise<string>`
+#### `createTab(): Promise<string>`
 
 创建新标签页并返回标签页 ID。
 
-##### `activeTab(tabId: string): Promise<boolean>`
+#### `activeTab(tabId: string): Promise<boolean>`
 
 切换到指定标签页。
 
-##### `closeTab(tabId: string): Promise<boolean>`
+#### `closeTab(tabId: string): Promise<boolean>`
 
 关闭指定标签页。
 
-##### `getTabsSnapshot(): TabsState`
+#### `getTabsSnapshot(): TabsState`
 
 获取所有标签页的当前状态快照。
 
@@ -259,59 +261,59 @@ interface DialogMeta {
 }
 ```
 
-##### `subscribeTabChange(callback: () => void): () => void`
+#### `subscribeTabChange(callback: () => void): () => void`
 
 订阅标签页变化事件，返回取消订阅函数。可以通过 `subscribeTabChange` 和 `getTabsSnapshot` 达到实时监听 tabs 变动的目的。
 
 <br />
 
-#### Cookies 管理
+### Cookies 管理
 
-##### `cookies(): Promise<Cookie[]>`
+#### `cookies(): Promise<Cookie[]>`
 
 获取所有 cookies。可直接参考 [Browser.cookies|Puppeteer](https://pptr.dev/api/puppeteer.browser.cookies)
 
-##### `setCookie(...cookies: CookieData[]): Promise<void>`
+#### `setCookie(...cookies: CookieData[]): Promise<void>`
 
 设置一个或多个 cookies。可直接参考 [Browser.setcookie|Puppeteer](https://pptr.dev/api/puppeteer.browser.setcookie)
 
-##### `deleteCookie(...cookies: Cookie[]): Promise<void>`
+#### `deleteCookie(...cookies: Cookie[]): Promise<void>`
 
 删除一个或多个 cookies。可直接参考 [Browser.deletecookie|Puppeteer](https://pptr.dev/api/puppeteer.browser.deletecookie)
 
-##### `deleteMatchingCookies(...filters: DeleteCookiesRequest[]): Promise<void>`
+#### `deleteMatchingCookies(...filters: DeleteCookiesRequest[]): Promise<void>`
 
 批量删除匹配指定条件的 cookies。可直接参考 [Browser.deleteMatchingCookies|Puppeteer](https://pptr.dev/api/puppeteer.browser.deleteMatchingCookies)
 
 <br />
 
-### Tab 类
+## Tab 类
 
 标签页类，提供页面级别的操作功能。
 
-#### 导航
+### 导航
 
-##### `goto(url: string, options?: NavigationOptions): Promise<void>`
+#### `goto(url: string, options?: NavigationOptions): Promise<void>`
 
 导航到指定 URL。可直接参考 [Page.goto|Puppeteer](https://pptr.dev/api/puppeteer.page.goto)
 
-##### `goBack(options?: NavigationOptions): Promise<boolean>`
+#### `goBack(options?: NavigationOptions): Promise<boolean>`
 
 导航到上一页。可直接参考 [Page.goBack|Puppeteer](https://pptr.dev/api/puppeteer.page.goBack)
 
-##### `goForward(options?: NavigationOptions): Promise<boolean>`
+#### `goForward(options?: NavigationOptions): Promise<boolean>`
 
 导航到下一页。可直接参考 [Page.goForward|Puppeteer](https://pptr.dev/api/puppeteer.page.goForward)
 
-##### `reload(options?: NavigationOptions): Promise<void>`
+#### `reload(options?: NavigationOptions): Promise<void>`
 
 重新加载当前页面。可直接参考 [Page.reload|Puppeteer](https://pptr.dev/api/puppeteer.page.reload)
 
 <br />
 
-#### 键盘操控
+### 键盘操控
 
-##### `press(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<void>`
+#### `press(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<void>`
 
 按下并释放按键或组合键。
 
@@ -319,48 +321,49 @@ interface DialogMeta {
 
 非组合键可直接参考 [Keyboard.reload|Puppeteer](https://pptr.dev/api/puppeteer.keyboard.press)
 
-##### `down(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<void>`
+#### `down(key: KeyOrHotKeyInput, options?: KeyboardOptions): Promise<void>`
 
 按下按键（不释放）。可参考 [Keyboard.down|Puppeteer](https://pptr.dev/api/puppeteer.keyboard.down)
 
-##### `up(key: KeyOrHotKeyInput): Promise<void>`
+#### `up(key: KeyOrHotKeyInput): Promise<void>`
 
 释放按键。可参考 [Keyboard.up|Puppeteer](https://pptr.dev/api/puppeteer.keyboard.up)
 
-##### `type(text: string, options?: KeyboardOptions): Promise<void>`
+#### `type(text: string, options?: KeyboardOptions): Promise<void>`
 
 输入文本。可参考 [Keyboard.type|Puppeteer](https://pptr.dev/api/puppeteer.keyboard.type)
 
 <br />
 
-#### 鼠标操控 (Vision)
+### 鼠标操控 (Vision)
 
-##### `click(x: number, y: number, options?: MouseClickOptions): Promise<void>`
+#### `click(x: number, y: number, options?: MouseClickOptions): Promise<void>`
 
 在指定坐标点击鼠标。可直接参考 [Mouse.click|Puppeteer](https://pptr.dev/api/puppeteer.mouse.click)
 
-##### `move(x: number, y: number, options?: MouseMoveOptions): Promise<void>`
+#### `move(x: number, y: number, options?: MouseMoveOptions): Promise<void>`
 
 移动鼠标到指定坐标。可直接参考 [Mouse.move|Puppeteer](https://pptr.dev/api/puppeteer.mouse.move)
 
-##### `drag(start: Point, end: Point, options?: object): Promise<void>`
+#### `drag(start: Point, end: Point, options?: object): Promise<void>`
 
 拖拽操作。可直接参考 [Mouse.dragAndDrop|Puppeteer](https://pptr.dev/api/puppeteer.mouse.dragAndDrop)
 
-##### `scroll(direction: ScrollDirection, delta: number): Promise<void>`
+#### `scroll(direction: ScrollDirection, delta: number): Promise<void>`
 
 滚动页面。
 
-**参数：**
-- `direction` - 滚动方向（'up' | 'down' | 'left' | 'right'）
-- `delta` - 滚动距离
+```typescript
+// 滚动方向
+type ScrollDirection = 'up' | 'down' | 'left' | 'right'
+```
 
 
 <br />
 
-#### 截图
+### 截图
 
-##### `screenshot<T extends TabScreenshotOptions>(options?: T): Promise<TabScreenshotResult<T>>`
+#### `screenshot<T extends TabScreenshotOptions>(options?: T): Promise<TabScreenshotResult<T>>`
 
 截取页面截图。
 
