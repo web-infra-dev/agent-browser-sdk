@@ -1,3 +1,7 @@
+<div align="right">
+  <a href="browser.zh-CN.md">简体中文</a> | <b>English</b>
+</div>
+
 # Introduction
 
 **@agent-infra/browser** is an SDK based on **puppeteer** specifically designed to provide foundational functionality for browser agents.
