@@ -248,6 +248,9 @@ export class BrowserContainer extends LitElement {
   };
 
   #handleKeyboard = (event: KeyboardEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
     this.dispatchEvent(
       new CustomEvent<KeyboardDetail>('canvas-keyboard-event', {
         detail: {
