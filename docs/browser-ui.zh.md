@@ -47,7 +47,7 @@
 键盘输入也支持，并支持了部分常见的快捷键（例如 `全选`/`复制`/`剪切`/`黏贴` 等）：
 
 <p>
-<video src="https://github.com/user-attachments/assets/23fcb3a5-78a4-4434-9068-e42810b1e91d" controls="true" width="600"></video>
+<video src="https://github.com/user-attachments/assets/1dbcd845-45e3-4f5d-b001-a6b4338bb034" controls="true" width="600"></video>
 </p>
 
 ## 剪切板模拟
