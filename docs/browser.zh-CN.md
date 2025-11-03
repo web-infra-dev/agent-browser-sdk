@@ -1,3 +1,7 @@
+<div align="right">
+  <b>简体中文</b> | <a href="browser.md">English</a>
+</div>
+
 # 前言
 
 **@agent-infra/browser** 是一套基于 **puppeteer** 的专为 browser agent 提供基础功能的 sdk。

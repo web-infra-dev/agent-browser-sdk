@@ -1,3 +1,7 @@
+<div align="right">
+  <a href="browser-ui.zh-CN.md">简体中文</a> | <b>English</b>
+</div>
+
 # Introduction
 
 **@agent-infra/browser-ui** is a CDP-based browser remote casting solution. It implements basic capability encapsulation based on **@agent-infra/browser** and can be directly referenced as a Web component by web pages.

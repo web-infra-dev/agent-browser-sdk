@@ -1,3 +1,7 @@
+<div align="right">
+  <b>简体中文</b> | <a href="browser-ui.md">English</a>
+</div>
+
 # 简介
 
 **@agent-infra/browser-ui** 是一个基于 CDP 的浏览器远程投屏解决方案。它基于 **@agent-infra/browser** 实现了基础的能力封装，可以作为一个 Web 组件直接被网页引用使用。
