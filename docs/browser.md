@@ -4,11 +4,11 @@
 
 # Introduction
 
-**@agent-infra/browser** is an SDK based on **puppeteer** specifically designed to provide foundational functionality for browser agents.
+**@agent-infra/browser** is an SDK based on **puppeteer** specifically designed to provide foundational functionality for Browser Agent.
 
-**puppeteer** is an excellent browser automation control software that encapsulates many CDP operations and provides a very concise set of APIs for users. However, when building GUI Agents based on **puppeteer**, you'll find it lacks some higher-level and common abstractions, such as tab management, dialog state management, hotkey support, etc.
+**puppeteer** is an excellent browser automation control software that encapsulates many CDP operations and provides a very concise set of APIs for users. However, when building Browser Agent based on **puppeteer**, you'll find it lacks some higher-level and common abstractions, such as tab management, dialog state management, hotkey support, etc.
 
-**@agent-infra/browser** was created to address these pain points. Its APIs maintain simplicity while being very intuitive for browser operations, allowing you to quickly build a Browser GUI Agent, a Browser Use Demo, or a Browser-Use-MCP.
+**@agent-infra/browser** was created to address these pain points. Its APIs maintain simplicity while being very intuitive for browser operations, allowing you to quickly build a Browser GUI Agent, a Browser screen casting component, or a Browser-MCP.
 
 <br />
 

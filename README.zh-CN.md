@@ -4,9 +4,8 @@
 
 # Agent Infra Browser
 
-@agent-infra/browser 致力于构建一个专为 AI 智能体和浏览器自动化设计的综合性浏览器基础设施工具包。
+@agent-infra/browser 致力于构建一个专为 AI Agent 设计的综合性浏览器基础设施 SDK。
 
-这个 monorepo 提供了用于浏览器检测、控制和 UI 交互的完整包集——构建智能浏览器自动化系统所需的一切。
 
 <br />
 
@@ -14,11 +13,9 @@
 
 这个工具包专门为以下场景设计：
 
-- 需要与 Web 浏览器交互的 **AI 智能体**
-- **浏览器自动化** 工具和测试框架
-- **远程浏览器控制** 应用程序
-- **网络爬虫** 和数据提取系统
-- **跨平台浏览器** 检测和管理
+- 需要与 Web 浏览器交互的 **GUI AI Agent**
+- 非 VNC 场景或 headless 场景下的**浏览器投屏**
+- Browser 自动化控制的 **MCP 服务**
 
 ## 架构
 
@@ -28,11 +25,11 @@
 
 ### [@agent-infra/browser](./packages/browser)
 
-**核心浏览器控制库**。
+**核心浏览器控制库**。抽象并封装了操纵浏览器所需要的基础能力。
 
 ### [@agent-infra/browser-ui](./packages/browser-ui)
 
-**浏览器界面组件**。用于通过 Chrome DevTools Protocol (CDP) 显示和与远程浏览器实例交互的 UI 组件。
+**浏览器投屏 UI 组件**。可通过 CDP 与远程浏览器连接，然后显示它的投屏内容。
 
 ### [@agent-infra/browser-finder](./packages/browser-finder)
 
@@ -71,7 +68,7 @@ pnpm run lint
 
 - **Node.js** >= 20.x
 - **pnpm** 用于包管理
-- **Chrome/Chromium** 浏览器以支持浏览器自动化功能
+- **Chrome/Chromium** 浏览器实例
 
 <br />
 

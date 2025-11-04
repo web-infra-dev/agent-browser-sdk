@@ -4,11 +4,11 @@
 
 # 前言
 
-**@agent-infra/browser** 是一套基于 **puppeteer** 的专为 browser agent 提供基础功能的 sdk。
+**@agent-infra/browser** 是一套基于 **puppeteer** 的专为 Browser Agent 提供基础功能的 SDK.
 
-**puppeteer** 是一款非常优秀的浏览器自动化控制软件，它封装了许多 CDP 操作，并提供了一套非常简洁的 API 供用户去使用。但是基于 **puppeteer** 构建 GUI Agent 的过程中，会发现它缺乏一些更为上层和通用的封装，例如 tabs 的管理，dialog 状态管理，hotkey 支持等。
+**puppeteer** 是一款非常优秀的浏览器自动化控制软件，它封装了许多 CDP 操作，并提供了一套非常简洁的 API 供用户去使用。但是基于 **puppeteer** 构建 Browser Agent 的过程中，会发现它缺乏一些更为上层和通用的封装，例如 tabs 的管理，dialog 状态管理，hotkey 支持等。
 
-**@agent-infra/browser** 就是为了解决上述的痛点而生，它提供的 API 在保持简洁的同时，还非常贴近操作浏览器的直觉，基于这点可以非常快速的封装出一个 Browser GUI Agent，一个 Browser Use Demo，或者是一个 Browser-Use-MCP。
+**@agent-infra/browser** 就是为了解决上述的痛点而生，它提供的 API 在保持简洁的同时，还非常贴近操作浏览器的直觉，基于这点可以非常快速的封装出一个 Browser GUI Agent，一个 Browser 投屏组件，或者是一个 Browser-MCP。
 
 <br />
 
