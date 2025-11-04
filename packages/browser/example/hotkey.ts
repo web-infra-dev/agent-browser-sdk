@@ -18,7 +18,7 @@ async function launchChrome(os: OSType, path: string) {
   const hotkey = new Keyboard(page, {
     osName: os,
     browserName: 'Chrome',
-    browserVersion: '1'
+    browserVersion: '1',
   });
 
   await delay(1000);

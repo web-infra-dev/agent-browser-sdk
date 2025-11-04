@@ -17,11 +17,9 @@ And the following **puppeteer-core** parameters are ignored by default:
 | --------------------- | ------------------------------------------------------------------------------------------- |
 | `--enable-automation` | Avoid the prompt "Chrome is being controlled by automated software" when the browser starts |
 
-
 <br />
 
 To learn more about Chrome launch flags, you can refer to the following link:
 
 - [Chrome Flags for Tooling](https://github.com/GoogleChrome/chrome-launcher/blob/main/docs/chrome-flags-for-tools.md)
 - [List of Chromium Command Line Switches](https://peter.sh/experiments/chromium-command-line-switches/)
-

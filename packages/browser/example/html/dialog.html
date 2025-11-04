@@ -1,107 +1,116 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Browser Dialog Test</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .button-group {
-      margin: 10px 0;
-    }
-    button {
-      margin: 5px;
-      margin-left: 0;
-      padding: 8px 16px;
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #e0e0e0;
-    }
-    .section {
-      margin: 20px 0;
-      padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-    .output {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #f9f9f9;
-      border: 1px solid #ddd;
-      min-height: 100px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Browser Dialog Test</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Browser Dialog Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .button-group {
+        margin: 10px 0;
+      }
+      button {
+        margin: 5px;
+        margin-left: 0;
+        padding: 8px 16px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #e0e0e0;
+      }
+      .section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .output {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        min-height: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Browser Dialog Test</h1>
 
-  <div class="section">
-    <h2>alert</h2>
-    <div class="button-group">
-      <button onclick="testAlert()">Simple Alert</button>
+    <div class="section">
+      <h2>alert</h2>
+      <div class="button-group">
+        <button onclick="testAlert()">Simple Alert</button>
+      </div>
     </div>
-  </div>
 
-  <div class="section">
-    <h2>confirm</h2>
-    <div class="button-group">
-      <button onclick="testConfirm()">Simple Confirm</button>
+    <div class="section">
+      <h2>confirm</h2>
+      <div class="button-group">
+        <button onclick="testConfirm()">Simple Confirm</button>
+      </div>
     </div>
-  </div>
 
-  <div class="section">
-    <h2>prompt</h2>
-    <div class="button-group">
-      <button onclick="testPrompt()">Simple Prompt</button>
-      <button onclick="testPromptWithDefault()">Prompt with Default Value</button>
+    <div class="section">
+      <h2>prompt</h2>
+      <div class="button-group">
+        <button onclick="testPrompt()">Simple Prompt</button>
+        <button onclick="testPromptWithDefault()">
+          Prompt with Default Value
+        </button>
+      </div>
     </div>
-  </div>
 
-  <div class="output" id="output">
-    <h3>Output:</h3>
-    <div id="outputText">Dialog results will appear here...</div>
-  </div>
+    <div class="output" id="output">
+      <h3>Output:</h3>
+      <div id="outputText">Dialog results will appear here...</div>
+    </div>
 
-  <script>
-    const output = document.getElementById('outputText');
+    <script>
+      const output = document.getElementById('outputText');
 
-    function log(message) {
-      output.innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + message;
-    }
+      function log(message) {
+        output.innerHTML +=
+          '<br>' + new Date().toLocaleTimeString() + ': ' + message;
+      }
 
-    function testAlert() {
-      log('Calling alert()...');
-      alert('This is a simple alert message!');
-      log('Alert closed');
-    }
+      function testAlert() {
+        log('Calling alert()...');
+        alert('This is a simple alert message!');
+        log('Alert closed');
+      }
 
-    function testConfirm() {
-      log('Calling confirm()...');
-      const result = confirm('Are you sure you want to continue?');
-      log('Confirm result: ' + result);
-    }
+      function testConfirm() {
+        log('Calling confirm()...');
+        const result = confirm('Are you sure you want to continue?');
+        log('Confirm result: ' + result);
+      }
 
-    function testPrompt() {
-      log('Calling prompt()...');
-      const result = prompt('Please enter your name:');
-      log('Prompt result: ' + (result !== null ? '"' + result + '"' : 'null (cancelled)'));
-    }
+      function testPrompt() {
+        log('Calling prompt()...');
+        const result = prompt('Please enter your name:');
+        log(
+          'Prompt result: ' +
+            (result !== null ? '"' + result + '"' : 'null (cancelled)'),
+        );
+      }
 
-    function testPromptWithDefault() {
-      log('Calling prompt() with default...');
-      const result = prompt('Enter your favorite color:', 'blue');
-      log('Prompt result: ' + (result !== null ? '"' + result + '"' : 'null (cancelled)'));
-    }
+      function testPromptWithDefault() {
+        log('Calling prompt() with default...');
+        const result = prompt('Enter your favorite color:', 'blue');
+        log(
+          'Prompt result: ' +
+            (result !== null ? '"' + result + '"' : 'null (cancelled)'),
+        );
+      }
 
-    log('Dialog test page loaded successfully');
-  </script>
-</body>
+      log('Dialog test page loaded successfully');
+    </script>
+  </body>
 </html>

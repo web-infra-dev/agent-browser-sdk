@@ -76,7 +76,7 @@ export class Base64ImageParser {
           try {
             const headerBytes = this.getHeaderBuffer(1024); // SOF marker
             this.dimensions = parseJpegDimensions(headerBytes);
-          } catch(e) {
+          } catch (e) {
             const fullBuffer = this.getBuffer();
             this.dimensions = parseJpegDimensions(fullBuffer);
           }

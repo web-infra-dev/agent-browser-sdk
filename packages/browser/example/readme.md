@@ -4,3 +4,4 @@ To run the example scripts, navigate to the `packages/browser` directory and exe
 
 ```bash
 npx tsx example/fileName.ts
+```

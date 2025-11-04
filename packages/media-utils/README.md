@@ -32,7 +32,9 @@ import { Base64ImageParser } from '@agent-infra/media-utils';
 
 // Initialize with a base64 image string
 // You only need to ensure that the input base64 string is image data; the data URI prefix is not required.
-const tool = new Base64ImageParser('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA...');
+const tool = new Base64ImageParser(
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA...',
+);
 // or
 const tool = new Base64ImageParser('iVBORw0KGgoAAAANSUhEUgA...');
 
@@ -57,7 +59,8 @@ const dataUri = tool.getDataUri(); // 'data:image/png;base64,...'
 ```typescript
 import { Base64ImageParser } from '@agent-infra/media-utils';
 
-const base64Image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+const base64Image =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
 
 const tool = new Base64ImageParser(base64Image);
 
@@ -75,4 +78,3 @@ Apache License 2.0.
 Special thanks to the open source projects that inspired this toolkit:
 
 - [puppeteer](https://github.com/puppeteer/puppeteer) - The underlying browser automation library
-

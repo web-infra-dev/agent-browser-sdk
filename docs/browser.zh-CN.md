@@ -34,7 +34,8 @@ const browser = await Browser.create();
 
 // 设置 User-Agent（可选）
 browser.setUserAgent({
-  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  userAgent:
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 });
 
 // 获取当前活跃标签页
@@ -80,7 +81,7 @@ await browser.closeTab(tabId);
 const tab = browser.getActiveTab();
 
 // 导航
-await tab.goto('https://example.com')
+await tab.goto('https://example.com');
 
 // 前进
 await tab.goForward();
@@ -154,7 +155,7 @@ if (pasteResult.success) {
 
 ```typescript
 interface DialogMeta {
-  type: "alert" | "confirm" | "prompt" | "beforeunload";
+  type: 'alert' | 'confirm' | 'prompt' | 'beforeunload';
   message: string;
   defaultValue: string;
 }
@@ -218,7 +219,7 @@ const cookies = await browser.cookies();
 await browser.setCookie({
   name: 'session',
   value: 'abc123',
-  domain: 'example.com'
+  domain: 'example.com',
 });
 
 // 删除 cookie
@@ -248,25 +249,24 @@ await browser.deleteMatchingCookies({ domain: 'example.com' });
 
 1. 除了 puppeteer-core 的内置参数外，调用 `Browser.create` 还默认添加了以下参数，以优化浏览器的使用体验：
 
-| 参数                                                             | 描述                                       |
+| 参数                                                            | 描述                                       |
 | --------------------------------------------------------------- | ------------------------------------------ |
-| `--mute-audio`                                                  | 静音任何音频                                 |
-| `--no-default-browser-check`                                    | 禁用默认浏览器检查，不提示设置为默认浏览器        |
-| `--ash-no-nudges`                                               | 避免蓝色气泡“用户教育”提示                     |
-| `--window-size=defaultViewport.width,defaultViewport.height+90` | 设置初始窗口大小。                            |
+| `--mute-audio`                                                  | 静音任何音频                               |
+| `--no-default-browser-check`                                    | 禁用默认浏览器检查，不提示设置为默认浏览器 |
+| `--ash-no-nudges`                                               | 避免蓝色气泡“用户教育”提示                 |
+| `--window-size=defaultViewport.width,defaultViewport.height+90` | 设置初始窗口大小。                         |
 
 <br />
 
 2. 以下 puppeteer-core 参数默认被忽略：
 
-| 参数                   | 描述                                                      |
+| 参数                  | 描述                                                      |
 | --------------------- | --------------------------------------------------------- |
-| `--enable-automation` | 避免在浏览器启动时出现“Chrome 正在被自动化软件控制”的提示         |
+| `--enable-automation` | 避免在浏览器启动时出现“Chrome 正在被自动化软件控制”的提示 |
 
 <br />
 
 3. 默认的 ViewPort 设置为 `{ width: 1280, height: 1024 }`，目的是为了和 AIO Sandbox 的默认浏览器尺寸保持一致。
-
 
 #### `disconnect(): Promise<void>`
 
@@ -346,7 +346,7 @@ interface TabMeta {
 }
 
 interface DialogMeta {
-  type: "alert" | "confirm" | "prompt" | "beforeunload";
+  type: 'alert' | 'confirm' | 'prompt' | 'beforeunload';
   message: string;
   defaultValue: string;
 }
@@ -399,7 +399,8 @@ interface UserAgentInfo {
 ```typescript
 // 设置简单的 User-Agent 字符串
 browser.setUserAgent({
-  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  userAgent:
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 });
 ```
 
@@ -408,6 +409,7 @@ browser.setUserAgent({
 获取当前浏览器的 User-Agent 信息。
 
 **返回值：**
+
 - 如果之前通过 `setUserAgent` 设置过，返回设置的 UserAgentInfo
 - 否则返回从浏览器获取的当前 User-Agent 字符串
 
@@ -523,7 +525,7 @@ interface ActionResult {
 **滚动方向：**
 
 ```typescript
-type ScrollDirection = 'up' | 'down' | 'left' | 'right'
+type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 ```
 
 <br />

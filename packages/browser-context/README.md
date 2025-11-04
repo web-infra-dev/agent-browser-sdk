@@ -32,7 +32,7 @@ await page.goto('https://example.com/article');
 
 // Extract content as Markdown
 const result = await extractContent(page);
-console.log(result.title);   // Article title
+console.log(result.title); // Article title
 console.log(result.content); // Clean Markdown content
 
 await browser.close();
@@ -43,16 +43,19 @@ await browser.close();
 Extract content from HTML strings:
 
 ```typescript
-import { extractWithDefuddle, extractWithReadability } from '@agent-infra/browser-context';
+import {
+  extractWithDefuddle,
+  extractWithReadability,
+} from '@agent-infra/browser-context';
 
 // Using Defuddle (primary method)
 const result1 = await extractWithDefuddle(htmlString, url, {
-  markdown: true
+  markdown: true,
 });
 
 // Using Readability (fallback method)
 const result2 = await extractWithReadability(page, {
-  markdown: true
+  markdown: true,
 });
 ```
 
@@ -65,21 +68,24 @@ import { toMarkdown } from '@agent-infra/browser-context';
 
 const html = '<h1>Title</h1><p>Content with <strong>bold</strong> text</p>';
 const markdown = toMarkdown(html, {
-  gfmExtension: true,        // Enable GitHub Flavored Markdown
-  codeBlockStyle: 'fenced',  // Use fenced code blocks
-  headingStyle: 'atx'        // Use # style headings
+  gfmExtension: true, // Enable GitHub Flavored Markdown
+  codeBlockStyle: 'fenced', // Use fenced code blocks
+  headingStyle: 'atx', // Use # style headings
 });
 
 console.log(markdown);
 // # Title
-// 
+//
 // Content with **bold** text
 ```
 
 ### Advanced HTML to Markdown Options
 
 ```typescript
-import { toMarkdown, DEFAULT_TAGS_TO_REMOVE } from '@agent-infra/browser-context';
+import {
+  toMarkdown,
+  DEFAULT_TAGS_TO_REMOVE,
+} from '@agent-infra/browser-context';
 
 const options = {
   gfmExtension: true,
@@ -87,7 +93,7 @@ const options = {
   headingStyle: 'atx' as const,
   emDelimiter: '*',
   strongDelimiter: '**',
-  removeTags: [...DEFAULT_TAGS_TO_REMOVE, 'footer', 'nav'] // Remove additional tags
+  removeTags: [...DEFAULT_TAGS_TO_REMOVE, 'footer', 'nav'], // Remove additional tags
 };
 
 const markdown = toMarkdown(htmlContent, options);
@@ -100,9 +106,11 @@ const markdown = toMarkdown(htmlContent, options);
 Main extraction function that automatically tries Defuddle first, then falls back to Readability.
 
 **Parameters:**
+
 - `page`: Puppeteer page instance
 
 **Returns:**
+
 - `Promise<{title: string, content: string}>`: Extracted title and Markdown content
 
 ### `extractWithDefuddle(html: string, url: string, options: DefuddleOptions)`
@@ -110,6 +118,7 @@ Main extraction function that automatically tries Defuddle first, then falls bac
 Extract content using the Defuddle library.
 
 **Parameters:**
+
 - `html`: HTML content string
 - `url`: Page URL
 - `options`: Defuddle configuration options
@@ -119,6 +128,7 @@ Extract content using the Defuddle library.
 Extract content using Mozilla's Readability algorithm.
 
 **Parameters:**
+
 - `page`: Puppeteer page instance
 - `options.markdown`: Whether to convert to Markdown (default: false)
 
@@ -127,10 +137,12 @@ Extract content using Mozilla's Readability algorithm.
 Convert HTML to Markdown format.
 
 **Parameters:**
+
 - `html`: HTML content string
 - `options`: Conversion options
 
 **ToMarkdownOptions:**
+
 - `gfmExtension`: Enable GitHub Flavored Markdown (default: true)
 - `removeTags`: Array of HTML tags to remove
 - `codeBlockStyle`: 'indented' | 'fenced'
@@ -161,6 +173,7 @@ You can customize this list using the `removeTags` option.
 ## Browser Compatibility
 
 This library is designed to work with:
+
 - Puppeteer
 - Playwright
 - Any browser automation tool that provides a Page-like interface

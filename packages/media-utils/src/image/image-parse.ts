@@ -13,14 +13,16 @@ export const IMAGE_MAGIC_STRINGS = new Map<string, ImageType>([
 ]);
 
 export const IMAGE_MAGIC_NUMBERS = new Map<Uint8Array, ImageType>([
-  [new Uint8Array([0xFF, 0xD8, 0xFF]), 'jpeg'], // JPEG: FF D8 FF
-  [new Uint8Array([0x89, 0x50, 0x4E, 0x47]), 'png'], // PNG: 89 50 4E 47
+  [new Uint8Array([0xff, 0xd8, 0xff]), 'jpeg'], // JPEG: FF D8 FF
+  [new Uint8Array([0x89, 0x50, 0x4e, 0x47]), 'png'], // PNG: 89 50 4E 47
   [new Uint8Array([0x52, 0x49, 0x46, 0x46]), 'webp'], // WebP: 52 49 46 46 (RIFF)
   [new Uint8Array([0x47, 0x49, 0x46, 0x38]), 'gif'], // GIF: 47 49 46 38
-  [new Uint8Array([0x42, 0x4D]), 'bmp'], // BMP: 42 4D
+  [new Uint8Array([0x42, 0x4d]), 'bmp'], // BMP: 42 4D
 ]);
 
-export function base64String2Uint8Array(base64: string): Uint8Array<ArrayBuffer> {
+export function base64String2Uint8Array(
+  base64: string,
+): Uint8Array<ArrayBuffer> {
   // @ts-ignore
   if (typeof Uint8Array.fromBase64 === 'function') {
     // New Uint8Array API

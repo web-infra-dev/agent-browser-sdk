@@ -75,7 +75,14 @@ export function getMacOSHotkey(params: KeyboardDetail): {
 export function isPasteHotkey(params: KeyboardDetail, os: OSType) {
   const { metaKey, ctrlKey, altKey, shiftKey, code } = params;
 
-  if (os === 'macOS' && metaKey && !ctrlKey && !altKey && !shiftKey && code === 'KeyV') {
+  if (
+    os === 'macOS' &&
+    metaKey &&
+    !ctrlKey &&
+    !altKey &&
+    !shiftKey &&
+    code === 'KeyV'
+  ) {
     return true;
   }
   if (!metaKey && ctrlKey && !altKey && !shiftKey && code === 'KeyV') {

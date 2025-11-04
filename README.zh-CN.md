@@ -6,7 +6,6 @@
 
 @agent-infra/browser 致力于构建一个专为 AI Agent 设计的综合性浏览器基础设施 SDK。
 
-
 <br />
 
 ## 这个工具的用途
@@ -62,6 +61,7 @@ pnpm run test
 # 代码检查
 pnpm run lint
 ```
+
 <br />
 
 ## 系统要求

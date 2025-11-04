@@ -12,8 +12,8 @@
 
 This toolkit is specifically designed for:
 
-- **GUI AI Agent** that needs to interact with web browsers  
-- **Browser screen casting** in non-VNC or headless scenarios  
+- **GUI AI Agent** that needs to interact with web browsers
+- **Browser screen casting** in non-VNC or headless scenarios
 - **MCP service** for browser automation control
 
 ## Architecture
@@ -30,16 +30,13 @@ This toolkit is specifically designed for:
 
 **Browser Screen Casting UI Components**. Can connect to remote browsers via CDP and then display their screen casting content.
 
-
-### [@agent-infra/browser-finder](./packages/browser-finder) 
+### [@agent-infra/browser-finder](./packages/browser-finder)
 
 **Cross-Platform Browser Detection**. Automatically locate installed browsers (Chrome, Edge, Firefox) on Windows, macOS, and Linux systems.
 
-
-### [@agent-infra/browser-context](./packages/browser-context) 
+### [@agent-infra/browser-context](./packages/browser-context)
 
 **Smart Web Content Extraction**. Extract clean, readable content from web pages and convert to Markdown format with advanced algorithms and browser automation support.
-
 
 ### [@agent-infra/media-utils](./packages/media-utils)
 
@@ -64,6 +61,7 @@ pnpm run test
 # Lint code
 pnpm run lint
 ```
+
 <br />
 
 ## Requirements
