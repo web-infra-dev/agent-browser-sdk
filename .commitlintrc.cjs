@@ -8,10 +8,10 @@ const path = require('path');
 function getPackageScopes() {
   const packagesDir = path.join(process.cwd(), 'packages');
   if (!fs.existsSync(packagesDir)) {
-    return ['all'];
+    return ['all', 'config'];
   }
 
-  const scopes = ['all'];
+  const scopes = ['all', 'config'];
   const items = fs.readdirSync(packagesDir, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
     .map(dirent => dirent.name);
