@@ -1,4 +1,4 @@
-import type { Protocol } from "puppeteer-core";
+import type { Protocol } from 'puppeteer-core';
 
 export interface DialogMetaInfo {
   type: Protocol.Page.DialogType;

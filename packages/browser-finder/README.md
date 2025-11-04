@@ -57,7 +57,8 @@ import { BrowserFinder } from '@agent-infra/browser-finder';
 const customLogger = {
   info: (msg: string, ...args: any[]) => console.log(`INFO: \${msg}`, ...args),
   warn: (msg: string, ...args: any[]) => console.warn(`WARN: \${msg}`, ...args),
-  error: (msg: string, ...args: any[]) => console.error(`ERROR: \${msg}`, ...args),
+  error: (msg: string, ...args: any[]) =>
+    console.error(`ERROR: \${msg}`, ...args),
   // ... other logger methods
 };
 
@@ -82,17 +83,20 @@ const browser = finder.findBrowser();
 Finds a browser and returns its path and type.
 
 **Parameters:**
+
 - `name` (optional): Specific browser to find (`'chrome'` | `'edge'` | `'firefox'`)
 
 **Returns:**
+
 ```typescript
 {
-  path: string;    // Full path to browser executable
+  path: string; // Full path to browser executable
   type: BrowserType; // Browser type ('chrome' | 'edge' | 'firefox')
 }
 ```
 
 **Examples:**
+
 ```typescript
 // Find any browser (automatic fallback)
 const anyBrowser = finder.findBrowser();
@@ -106,16 +110,19 @@ const firefox = finder.findBrowser('firefox');
 ## Supported Browsers
 
 ### Chrome
+
 - **Windows**: Chrome, Chrome Beta, Chrome Dev, Chrome Canary
 - **macOS**: Google Chrome, Google Chrome Beta, Google Chrome Dev, Google Chrome Canary
 - **Linux**: google-chrome-stable, google-chrome, google-chrome-beta, google-chrome-dev, chromium-browser, chromium
 
 ### Edge
+
 - **Windows**: Edge, Edge Beta, Edge Dev, Edge Canary
 - **macOS**: Edge, Edge Beta, Edge Dev, Edge Canary
 - **Linux**: microsoft-edge-stable, microsoft-edge-beta, microsoft-edge-dev
 
 ### Firefox
+
 - **Windows**: Mozilla Firefox, Firefox Developer Edition, Firefox Nightly
 - **macOS**: Firefox, Firefox Developer Edition, Firefox Nightly
 - **Linux**: firefox (all editions use same binary name)

@@ -34,7 +34,8 @@ const browser = await Browser.create();
 
 // Set User-Agent (optional)
 browser.setUserAgent({
-  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  userAgent:
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 });
 
 // Get current active tab
@@ -80,7 +81,7 @@ For activeTab, users can perform navigation operations through related APIs.
 const tab = browser.getActiveTab();
 
 // Navigate
-await tab.goto('https://example.com')
+await tab.goto('https://example.com');
 
 // Forward
 await tab.goForward();
@@ -154,7 +155,7 @@ Dialog types are as follows:
 
 ```typescript
 interface DialogMeta {
-  type: "alert" | "confirm" | "prompt" | "beforeunload";
+  type: 'alert' | 'confirm' | 'prompt' | 'beforeunload';
   message: string;
   defaultValue: string;
 }
@@ -218,7 +219,7 @@ const cookies = await browser.cookies();
 await browser.setCookie({
   name: 'session',
   value: 'abc123',
-  domain: 'example.com'
+  domain: 'example.com',
 });
 
 // Delete cookie
@@ -248,25 +249,24 @@ Create and initialize browser instance. LaunchOptions is puppeteer's [launch par
 
 1. In addition to puppeteer-core's built-in parameters, calling `Browser.create` also adds the following parameters by default to optimize the browser usage experience:
 
-| Parameter                                                             | Description                                       |
-| --------------------------------------------------------------- | ------------------------------------------ |
-| `--mute-audio`                                                  | Mute any audio                                 |
-| `--no-default-browser-check`                                    | Disable default browser check, don't prompt to set as default browser        |
-| `--ash-no-nudges`                                               | Avoid blue bubble "user education" prompts                     |
-| `--window-size=defaultViewport.width,defaultViewport.height+90` | Set initial window size.                            |
+| Parameter                                                       | Description                                                           |
+| --------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `--mute-audio`                                                  | Mute any audio                                                        |
+| `--no-default-browser-check`                                    | Disable default browser check, don't prompt to set as default browser |
+| `--ash-no-nudges`                                               | Avoid blue bubble "user education" prompts                            |
+| `--window-size=defaultViewport.width,defaultViewport.height+90` | Set initial window size.                                              |
 
 <br />
 
 2. The following puppeteer-core parameters are ignored by default:
 
-| Parameter                   | Description                                                      |
-| --------------------- | --------------------------------------------------------- |
-| `--enable-automation` | Avoid showing "Chrome is being controlled by automation software" prompt when browser starts         |
+| Parameter             | Description                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| `--enable-automation` | Avoid showing "Chrome is being controlled by automation software" prompt when browser starts |
 
 <br />
 
 3. The default ViewPort is set to `{ width: 1280, height: 1024 }` to maintain consistency with AIO Sandbox's default browser size.
-
 
 #### `disconnect(): Promise<void>`
 
@@ -346,7 +346,7 @@ interface TabMeta {
 }
 
 interface DialogMeta {
-  type: "alert" | "confirm" | "prompt" | "beforeunload";
+  type: 'alert' | 'confirm' | 'prompt' | 'beforeunload';
   message: string;
   defaultValue: string;
 }
@@ -399,7 +399,8 @@ interface UserAgentInfo {
 ```typescript
 // Set simple User-Agent string
 browser.setUserAgent({
-  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  userAgent:
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 });
 ```
 
@@ -408,6 +409,7 @@ browser.setUserAgent({
 Get current browser's User-Agent information.
 
 **Return Value:**
+
 - If previously set through `setUserAgent`, returns the set UserAgentInfo
 - Otherwise returns the current User-Agent string obtained from the browser
 
@@ -523,7 +525,7 @@ Scroll page.
 **Scroll Direction:**
 
 ```typescript
-type ScrollDirection = 'up' | 'down' | 'left' | 'right'
+type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 ```
 
 <br />

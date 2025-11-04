@@ -1,4 +1,4 @@
-import type { Protocol } from "puppeteer-core";
+import type { Protocol } from 'puppeteer-core';
 
 export interface UserAgentInfo {
   userAgent?: string;

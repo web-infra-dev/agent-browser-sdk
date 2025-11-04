@@ -108,7 +108,10 @@ export class Keyboard {
     return { success: true };
   }
 
-  async type(text: string, options: KeyboardOptions = {}): Promise<ActionResult> {
+  async type(
+    text: string,
+    options: KeyboardOptions = {},
+  ): Promise<ActionResult> {
     if (this.#dialog.isOpen) {
       return this.#buildDialogResponse('type');
     }

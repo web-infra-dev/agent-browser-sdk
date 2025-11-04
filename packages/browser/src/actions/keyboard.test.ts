@@ -38,14 +38,18 @@ describe('Keyboard', () => {
     // @ts-ignore
     mockDialog = {
       isOpen: false,
-    }
+    };
 
     vi.clearAllMocks();
   });
 
   describe('constructor', () => {
     it('should create instance with correct OS and browser', () => {
-      const keyboard = new Keyboard(mockPage, mockDialog, { osName: 'macOS', browserName: 'Chrome', browserVersion: '140' });
+      const keyboard = new Keyboard(mockPage, mockDialog, {
+        osName: 'macOS',
+        browserName: 'Chrome',
+        browserVersion: '140',
+      });
       expect(keyboard).toBeInstanceOf(Keyboard);
     });
 
@@ -452,10 +456,14 @@ describe('Keyboard', () => {
         browserVersion: '140',
       });
 
-      await keyboard.type('this is a very long text that should use sendCharacter method instead of type method');
+      await keyboard.type(
+        'this is a very long text that should use sendCharacter method instead of type method',
+      );
 
       expect(mockKeyboard.type).not.toHaveBeenCalled();
-      expect(mockKeyboard.sendCharacter).toHaveBeenCalledWith('this is a very long text that should use sendCharacter method instead of type method');
+      expect(mockKeyboard.sendCharacter).toHaveBeenCalledWith(
+        'this is a very long text that should use sendCharacter method instead of type method',
+      );
     });
 
     it('should use sendCharacter for text without delay', async () => {

@@ -217,7 +217,10 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #region navigation
 
-  async goto(url: string, options: NavigationOptions = {}): Promise<NavigationResult> {
+  async goto(
+    url: string,
+    options: NavigationOptions = {},
+  ): Promise<NavigationResult> {
     // validate / normalize url before navigation
     const validated = validateNavigationUrl(url);
     if (validated.ignored) {

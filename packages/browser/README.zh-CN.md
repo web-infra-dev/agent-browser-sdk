@@ -24,7 +24,8 @@ const browser = await Browser.create();
 
 // 设置 User-Agent（可选）
 browser.setUserAgent({
-  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  userAgent:
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 });
 
 // 获取当前活动标签页

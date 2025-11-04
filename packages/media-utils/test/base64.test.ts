@@ -4,14 +4,7 @@
  */
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  beforeEach,
-  afterEach,
-} from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach } from 'vitest';
 import { Base64ImageParser } from '../src';
 
 interface TestImageData {

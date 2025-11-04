@@ -9,7 +9,12 @@ import { Tabs } from '../tabs/tabs';
 import { getEnvInfo } from '../env';
 import { BaseBrowser } from './base';
 
-import type { Cookie, CookieData, DeleteCookiesRequest, LaunchOptions } from 'puppeteer-core';
+import type {
+  Cookie,
+  CookieData,
+  DeleteCookiesRequest,
+  LaunchOptions,
+} from 'puppeteer-core';
 
 export class Browser extends BaseBrowser<Tabs> {
   /**

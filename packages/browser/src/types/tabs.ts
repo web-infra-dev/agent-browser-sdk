@@ -96,7 +96,6 @@ export interface NavigationErrorResult {
 
 export type NavigationResult = NavigationSuccessResult | NavigationErrorResult;
 
-
 export type TabScreenshotOptions = Pick<
   ScreenshotOptions,
   'type' | 'quality' | 'fullPage' | 'path'
@@ -116,7 +115,8 @@ export interface ScreenshotResultWithoutPath extends BaseScreenshotResult {
   data: string;
 }
 
-export type TabScreenshotResult<T extends TabScreenshotOptions> =
-  T extends { path: string }
-    ? ScreenshotResultWithPath
-    : ScreenshotResultWithoutPath;
+export type TabScreenshotResult<T extends TabScreenshotOptions> = T extends {
+  path: string;
+}
+  ? ScreenshotResultWithPath
+  : ScreenshotResultWithoutPath;

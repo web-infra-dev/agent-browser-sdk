@@ -29,10 +29,7 @@ export class Tabs<T extends Tab = Tab> {
   public state: TabsState;
   #isIntentionalDestroy = false;
 
-  static async create(
-    browser: Browser,
-    options: TabsOptions,
-  ) {
+  static async create(browser: Browser, options: TabsOptions) {
     const tabs = new Tabs(browser, options);
     await tabs.initializeExistingTabs();
     return tabs;

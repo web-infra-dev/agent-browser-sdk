@@ -9,6 +9,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
     "prepare": "husky"
   },
   "keywords": [],
