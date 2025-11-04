@@ -4,9 +4,7 @@
 
 # Agent Infra Browser
 
-@agent-infra/browser is dedicated to building a comprehensive browser infrastructure toolkit designed for AI agents and browser automation.
-
-This monorepo provides a complete set of packages for browser detection, control and UI interaction —— everything you need to build intelligent browser automation systems.
+@agent-infra/browser is dedicated to building a comprehensive browser infrastructure SDK specifically designed for AI Agents.
 
 <br />
 
@@ -14,12 +12,9 @@ This monorepo provides a complete set of packages for browser detection, control
 
 This toolkit is specifically designed for:
 
-- **AI Agents** that need to interact with web browsers
-- **Browser Automation** tools and testing frameworks
-- **Remote Browser Control** applications
-- **Web Scraping** and data extraction systems
-- **Cross-platform Browser** detection and management
-
+- **GUI AI Agent** that needs to interact with web browsers  
+- **Browser screen casting** in non-VNC or headless scenarios  
+- **MCP service** for browser automation control
 
 ## Architecture
 
@@ -29,12 +24,11 @@ This toolkit is specifically designed for:
 
 ### [@agent-infra/browser](./packages/browser)
 
-**Core Browser Control Library**.
-
+**Core Browser Control Library**. Abstracts and encapsulates the fundamental capabilities required to manipulate browsers.
 
 ### [@agent-infra/browser-ui](./packages/browser-ui)
 
-**Browser Interface Components**. UI components for displaying and interacting with remote browser instances through Chrome DevTools Protocol (CDP).
+**Browser Screen Casting UI Components**. Can connect to remote browsers via CDP and then display their screen casting content.
 
 
 ### [@agent-infra/browser-finder](./packages/browser-finder) 
