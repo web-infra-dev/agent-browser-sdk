@@ -37,9 +37,6 @@ jobs:
       - name: Update npm
         run: pnpm install --global npm@11.6.2
 
-      - name: Who am I
-        run: npm whoami
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
