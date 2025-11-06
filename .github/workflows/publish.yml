@@ -31,7 +31,6 @@ jobs:
           node-version: 22
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
-          provenance: true
 
       # Ensure npm 11.5.1 or later is installed
       - name: Update npm
