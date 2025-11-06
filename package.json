@@ -10,6 +10,8 @@
     "test:watch": "vitest",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
+    "changeset:version": "changeset version && pnpm -r generate:version && git add --all",
+    "changeset:release": "changeset publish",
     "prepare": "husky"
   },
   "keywords": [],
