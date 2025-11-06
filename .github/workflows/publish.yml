@@ -76,8 +76,8 @@ jobs:
           # Check if version contains pre-release identifier
           if [[ "$VERSION" =~ -[a-zA-Z0-9.-]+$ ]]; then
             # This is a pre-release version
-            pnpm publish -r --filter "{packages/*}" --no-git-checks --tag beta
+            pnpm publish -r --filter "{packages/*}" --access public --no-git-checks --tag beta
           else
             # This is a stable release
-            pnpm publish -r --filter "{packages/*}" --no-git-checks --tag latest
+            pnpm publish -r --filter "{packages/*}" --access public --no-git-checks --tag latest
           fi
