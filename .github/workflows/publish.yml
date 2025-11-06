@@ -71,4 +71,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm
-        run: pnpm publish -r --filter "{packages/*}" --no-git-checks --tag latest
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          # Check if version contains pre-release identifier
+          if [[ "$VERSION" =~ -[a-zA-Z0-9.-]+$ ]]; then
+            # This is a pre-release version
+            pnpm publish -r --filter "{packages/*}" --no-git-checks --tag beta
+          else
+            # This is a stable release
+            pnpm publish -r --filter "{packages/*}" --no-git-checks --tag latest
+          fi
