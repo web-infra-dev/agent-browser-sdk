@@ -6,8 +6,8 @@ on:
       - 'v*'
 
 permissions:
-  id-token: write # Required for OIDC
-  contents: write
+  contents: write # to create release
+  id-token: write # OpenID Connect token needed for provenance
 
 jobs:
   publish:
@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout code repository
         uses: actions/checkout@v4
+        with:
+          # This makes Actions fetch all Git history
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -27,13 +30,14 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
 
       # Ensure npm 11.5.1 or later is installed
       - name: Update npm
-        run: pnpm install --global npm@11.6.2
+        run: npm install --global npm@11.6.2
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Style check
         run: pnpm run format:check
@@ -41,11 +45,39 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Create and publish versions
-        uses: changesets/action@v1
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Update package versions to tag version
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          echo "Updating all packages to version $VERSION"
+
+          # Update all package.json files in packages directory
+          for pkg in packages/*/package.json; do
+            echo "Updating $pkg to version $VERSION"
+            jq --arg version "$VERSION" '.version = $version' "$pkg" > tmp.json && mv tmp.json "$pkg"
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          commit: 'chore: update versions'
-          title: 'chore: update versions'
-          publish: pnpm publish -r
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npm
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          # Check if version contains pre-release identifier
+          if [[ "$VERSION" =~ -[a-zA-Z0-9.-]+$ ]]; then
+            # This is a pre-release version
+            pnpm publish -r --filter "{packages/*}" --access public --no-git-checks --tag beta
+          else
+            # This is a stable release
+            pnpm publish -r --filter "{packages/*}" --access public --no-git-checks --tag latest
+          fi

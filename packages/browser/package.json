@@ -1,7 +1,7 @@
 {
   "name": "@agent-infra/browser",
   "description": "agent-infra browser",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -30,7 +30,6 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
-    "prepare": "npm run build",
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest",
