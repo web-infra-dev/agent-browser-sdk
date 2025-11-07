@@ -17,6 +17,7 @@ import type {
   NavigationEventDetail,
   NavigationActionEventDetail,
   DialogAcceptEventDetail,
+  UIBrowserOptions,
 } from './types';
 
 export interface BrowserUIOptions {
@@ -71,7 +72,10 @@ export class BrowserUI {
     const canvasEle = this.#getCanvas();
 
     // Create canvas browser
-    this.#canvasBrowser = await UIBrowser.create(canvasEle, browserOptions);
+    const uiBrowserOptions: UIBrowserOptions = {
+      connect: browserOptions,
+    };
+    this.#canvasBrowser = await UIBrowser.create(canvasEle, uiBrowserOptions);
 
     // Setup event listeners
     this.#setupEventListeners();

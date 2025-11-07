@@ -4,4 +4,4 @@
  */
 export * from './ui';
 export * from './event';
-export * from './screencast';
+export * from './model';

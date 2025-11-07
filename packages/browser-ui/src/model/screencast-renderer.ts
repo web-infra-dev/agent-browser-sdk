@@ -22,11 +22,10 @@ import { EventEmitter } from 'eventemitter3';
 import { drawBase64ToCanvas } from '../utils';
 
 import type { Page, CDPSession, Protocol } from 'puppeteer-core';
-import { ScreenCastOptions } from '../types';
+import type { ScreenCastOptions } from '../types';
 
 export class ScreencastRenderer extends EventEmitter {
   #page: Page;
-  #tabId: string;
   #canvas: HTMLCanvasElement;
   #options: Required<ScreenCastOptions>;
   #cdpSession?: CDPSession;
@@ -43,7 +42,6 @@ export class ScreencastRenderer extends EventEmitter {
   ) {
     super();
     this.#page = page;
-    this.#tabId = options.tabId;
     this.#canvas = canvas;
 
     this.#options = {
@@ -183,6 +181,6 @@ export class ScreencastRenderer extends EventEmitter {
   }
 
   get tabId(): string {
-    return this.#tabId;
+    return this.#options.tabId;
   }
 }

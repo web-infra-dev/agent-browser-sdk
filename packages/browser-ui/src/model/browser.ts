@@ -7,26 +7,29 @@ import { getEnvInfo, BaseBrowser } from '@agent-infra/browser/web';
 import { UITabs } from './tabs';
 
 import type { Browser, ConnectOptions } from 'puppeteer-core';
+import type { UIBrowserOptions, UITabsOptions } from '../types';
 
 /**
  * https://pptr.dev/guides/running-puppeteer-in-the-browser
  */
 export class UIBrowser extends BaseBrowser<UITabs> {
-  private element: HTMLCanvasElement;
+  #element: HTMLCanvasElement;
+  #options: UIBrowserOptions;
 
   static async create(
     element: HTMLCanvasElement,
-    options: ConnectOptions,
+    options: UIBrowserOptions,
   ): Promise<UIBrowser> {
-    const uiBrowser = new UIBrowser(element);
-    await uiBrowser.#init(options);
+    const uiBrowser = new UIBrowser(element, options);
+    await uiBrowser.#init();
 
     return uiBrowser;
   }
 
-  constructor(element: HTMLCanvasElement) {
+  constructor(element: HTMLCanvasElement, options: UIBrowserOptions) {
     super();
-    this.element = element;
+    this.#element = element;
+    this.#options = options;
   }
 
   async disconnect(): Promise<void> {
@@ -39,8 +42,8 @@ export class UIBrowser extends BaseBrowser<UITabs> {
     await super.disconnect();
   }
 
-  async #init(options: ConnectOptions) {
-    const processedOptions = this.#processOptions(options);
+  async #init() {
+    const processedOptions = this.#processOptions(this.#options.connect);
 
     await this.#connect(processedOptions);
   }
@@ -80,10 +83,11 @@ export class UIBrowser extends BaseBrowser<UITabs> {
 
     this.wsEndpoint = this.pptrBrowser.wsEndpoint();
     this._envInfo = await getEnvInfo(this.pptrBrowser);
-    this._tabs = await UITabs.UICreate(this.pptrBrowser, this.element, {
+    this._tabs = await UITabs.UICreate(this.pptrBrowser, this.#element, {
       viewport: options.defaultViewport!,
       envInfo: this._envInfo,
-    });
+      cast: this.#options.cast,
+    } as UITabsOptions);
 
     this.setupAutoReconnect();
     this.#setupVisibilityHandler();
@@ -112,10 +116,11 @@ export class UIBrowser extends BaseBrowser<UITabs> {
     this.pptrBrowser = (await connect(connectOptions)) as unknown as Browser;
 
     this.wsEndpoint = this.pptrBrowser.wsEndpoint();
-    this._tabs = await UITabs.UICreate(this.pptrBrowser, this.element, {
+    this._tabs = await UITabs.UICreate(this.pptrBrowser, this.#element, {
       viewport: this.defaultViewport,
       envInfo: this._envInfo!,
-    });
+      cast: this.#options.cast,
+    } as UITabsOptions);
 
     // Restore active tab's ScreencastRenderer after reconnection
     const activeTab = this.getActiveTab();
