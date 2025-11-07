@@ -40,10 +40,11 @@ BrowserUI.create({
 
 ### browserOptions
 
-| Property | Type             | Default  | Description                                                                                           |
-| -------- | ---------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| connect  | `ConnectOptions` | -        | Browser connection configuration, see [ConnectOptions](https://pptr.dev/api/puppeteer.connectoptions) |
-| cast     | `CastOptions`    | optional | Screenshot casting configuration                                                                      |
+| Property     | Type             | Default    | Description                                                                                           |
+| ------------ | ---------------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| connect      | `ConnectOptions` | -          | Browser connection configuration, see [ConnectOptions](https://pptr.dev/api/puppeteer.connectoptions) |
+| cast         | `CastOptions`    | optional   | Screenshot casting configuration                                                                      |
+| searchEngine | `SearchEngine`   | `'google'` | Search engine configuration, supports `'google'`, `'bing'`, `'baidu'`                                 |
 
 #### CastOptions
 
