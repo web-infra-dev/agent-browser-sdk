@@ -362,21 +362,8 @@ export class Tabs<T extends Tab = Tab> {
     );
     tab.on(
       TabEvents.TabUrlChanged,
-      (event: TabEventsMap[TabEvents.TabUrlChanged]) => {
-        const currentTabMeta = this.state.tabs.get(tabId);
-        if (!currentTabMeta) return;
-
-        const updatedTabMeta: TabMeta = {
-          ...currentTabMeta,
-          url: event.newUrl,
-          title: event.title,
-          favicon: event.favicon,
-          canGoBack: event.canGoBack,
-          canGoForward: event.canGoForward,
-        };
-
-        this.state.tabs.set(tabId, updatedTabMeta);
-      },
+      (event: TabEventsMap[TabEvents.TabUrlChanged]) =>
+        this.#syncTabMeta(event.tabId),
     );
     tab.on(
       TabEvents.TabVisibilityChanged,
