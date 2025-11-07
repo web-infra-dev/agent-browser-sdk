@@ -20,5 +20,6 @@ BrowserUI.create({
         height: 900,
       },
     },
+    searchEngine: 'baidu',
   },
 });
