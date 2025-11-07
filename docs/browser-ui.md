@@ -29,10 +29,29 @@ if (!container) {
 BrowserUI.create({
   root: container,
   browserOptions: {
-    browserWSEndpoint: 'https://example.com/ws/url',
+    connect: {
+      browserWSEndpoint: 'https://example.com/ws/url',
+    },
   },
 });
 ```
+
+## Configuration Options
+
+### browserOptions
+
+| Property | Type             | Default  | Description                                                                                           |
+| -------- | ---------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| connect  | `ConnectOptions` | -        | Browser connection configuration, see [ConnectOptions](https://pptr.dev/api/puppeteer.connectoptions) |
+| cast     | `CastOptions`    | optional | Screenshot casting configuration                                                                      |
+
+#### CastOptions
+
+| Property      | Type              | Default  | Description                                                   |
+| ------------- | ----------------- | -------- | ------------------------------------------------------------- |
+| format        | `'jpeg' \| 'png'` | `'jpeg'` | Screenshot format                                             |
+| quality       | `number` (0-100)  | `80`     | Compression quality, only effective for JPEG format           |
+| everyNthFrame | `number`          | `1`      | Send every n-th frame to reduce network transmission overhead |
 
 # Features
 

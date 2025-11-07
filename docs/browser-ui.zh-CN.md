@@ -29,10 +29,29 @@ if (!container) {
 BrowserUI.create({
   root: container,
   browserOptions: {
-    browserWSEndpoint: 'https://example.com/ws/url',
+    connect: {
+      browserWSEndpoint: 'https://example.com/ws/url',
+    },
   },
 });
 ```
+
+## 配置选项
+
+### browserOptions
+
+| 属性    | 类型             | 默认值 | 描述                                                                                   |
+| ------- | ---------------- | ------ | -------------------------------------------------------------------------------------- |
+| connect | `ConnectOptions` | -      | 浏览器连接配置，可参考 [ConnectOptions](https://pptr.dev/api/puppeteer.connectoptions) |
+| cast    | `CastOptions`    | 可选   | 截图投屏配置                                                                           |
+
+#### CastOptions
+
+| 属性          | 类型              | 默认值   | 描述                                     |
+| ------------- | ----------------- | -------- | ---------------------------------------- |
+| format        | `'jpeg' \| 'png'` | `'jpeg'` | 截图格式                                 |
+| quality       | `number` (0-100)  | `80`     | 压缩质量，仅对 JPEG 格式有效             |
+| everyNthFrame | `number`          | `1`      | 每隔多少帧发送一次，用于降低网络传输开销 |
 
 # 功能
 
