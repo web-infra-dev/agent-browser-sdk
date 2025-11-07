@@ -40,10 +40,11 @@ BrowserUI.create({
 
 ### browserOptions
 
-| 属性    | 类型             | 默认值 | 描述                                                                                   |
-| ------- | ---------------- | ------ | -------------------------------------------------------------------------------------- |
-| connect | `ConnectOptions` | -      | 浏览器连接配置，可参考 [ConnectOptions](https://pptr.dev/api/puppeteer.connectoptions) |
-| cast    | `CastOptions`    | 可选   | 截图投屏配置                                                                           |
+| 属性         | 类型             | 默认值     | 描述                                                                                   |
+| ------------ | ---------------- | ---------- | -------------------------------------------------------------------------------------- |
+| connect      | `ConnectOptions` | -          | 浏览器连接配置，可参考 [ConnectOptions](https://pptr.dev/api/puppeteer.connectoptions) |
+| cast         | `CastOptions`    | 可选       | 截图投屏配置                                                                           |
+| searchEngine | `SearchEngine`   | `'google'` | 搜索引擎配置，支持 `'google'`、`'bing'`、`'baidu'`                                     |
 
 #### CastOptions
 

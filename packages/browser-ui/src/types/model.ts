@@ -6,6 +6,8 @@
 import type { ConnectOptions } from 'puppeteer-core';
 import type { TabsOptions, TabOptions } from '@agent-infra/browser/web';
 
+export type SearchEngine = 'google' | 'bing' | 'baidu';
+
 export interface CastOptions {
   format?: 'jpeg' | 'png';
   /**
@@ -21,6 +23,7 @@ export interface CastOptions {
 export interface UIBrowserOptions {
   connect: ConnectOptions;
   cast?: CastOptions;
+  searchEngine?: SearchEngine;
 }
 
 export interface UITabOptions extends TabOptions {

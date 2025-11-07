@@ -5,7 +5,11 @@
 import { UIBrowser } from './model/browser';
 import './view';
 import { BrowserContainer } from './view';
-import { getMacOSHotkey, isPasteHotkey } from './utils';
+import {
+  getMacOSHotkey,
+  isPasteHotkey,
+  processUrlForNavigation,
+} from './utils';
 
 import type { KeyInput } from 'puppeteer-core';
 import type {
@@ -295,17 +299,14 @@ export class BrowserUI {
     e.stopPropagation();
 
     const url = (e as CustomEvent<NavigationEventDetail>).detail.url;
-    let finalUrl = url;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      if (url.includes('.') && !url.includes(' ')) {
-        finalUrl = `https://${url}`;
-      } else {
-        finalUrl = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
-      }
-    }
+    const finalUrl = processUrlForNavigation(
+      url,
+      this.#options.browserOptions.searchEngine,
+    );
 
     const activeTab = this.#canvasBrowser!.getActiveTab();
     if (!activeTab) return;
+
     await activeTab.goto(finalUrl);
   };
 

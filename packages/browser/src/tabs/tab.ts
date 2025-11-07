@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import delay from 'delay';
 import { EventEmitter } from 'eventemitter3';
 import { BinaryImageParser, Base64ImageParser } from '@agent-infra/media-utils';
 import { disableWebdriver, visibilityScript } from '../injected-script';
@@ -86,17 +87,13 @@ export class Tab extends EventEmitter<TabEventsMap> {
   }
 
   async getTitle() {
-    if (!this.#title) {
-      this.#title = await this.#pptrPage.title();
-    }
+    this.#title = await this.#getTitle();
 
     return this.#title;
   }
 
   async getFavicon() {
-    if (!this.#favicon) {
-      this.#favicon = await this.#getFavicon();
-    }
+    this.#favicon = await this.#getFavicon();
 
     return this.#favicon;
   }
@@ -249,13 +246,10 @@ export class Tab extends EventEmitter<TabEventsMap> {
     if (validated.ignored) {
       return {
         success: false,
-        url: url,
+        url: validated.url,
         message: validated.message!,
       };
     }
-
-    this.#url = validated.url;
-    this.#title = validated.url;
 
     this.#setLoading(true);
 
@@ -270,22 +264,18 @@ export class Tab extends EventEmitter<TabEventsMap> {
         timeout: options.timeout,
       });
 
-      this.#title = await this.#pptrPage.title();
-      this.#favicon = await this.#getFavicon();
-
-      this.#setLoading(false);
-
       return {
         success: true,
-        url: this.#url,
+        url: validated.url,
       };
     } catch (error) {
-      this.#setLoading(false);
       return {
         success: false,
         message: error instanceof Error ? error.message : String(error),
         url: validated.url,
       };
+    } finally {
+      this.#setLoading(false);
     }
   }
 
@@ -426,30 +416,14 @@ export class Tab extends EventEmitter<TabEventsMap> {
     if (!frame.parentFrame()) {
       const oldUrl = this.#url;
       const newUrl = frame.url();
-      const [title, favicon, historyData] = await Promise.all([
-        this.#pptrPage.title().catch(() => 'Loading...'),
-        this.#getFavicon().catch(() => ''),
-        this.getHistory().catch(() => ({
-          index: 0,
-          history: [],
-          canGoBack: false,
-          canGoForward: false,
-        })),
-      ]);
 
       this.#url = newUrl;
-      this.#title = title;
-      this.#favicon = favicon;
 
       if (oldUrl !== newUrl) {
         this.emit(TabEvents.TabUrlChanged, {
           tabId: this.#id,
           oldUrl: oldUrl,
           newUrl: newUrl,
-          title: title,
-          favicon: favicon,
-          canGoBack: historyData.canGoBack,
-          canGoForward: historyData.canGoForward,
         });
       }
     }
@@ -508,12 +482,37 @@ export class Tab extends EventEmitter<TabEventsMap> {
 
   // #endregion
 
+  // #region private methods
+
+  async #getTitle() {
+    try {
+      await delay(100);
+      const pptrTitle = (await this.#pptrPage.title()).trim();
+      if (pptrTitle) {
+        return pptrTitle;
+      }
+
+      const domTitle = await this.#pptrPage.evaluate(() => {
+        const titleElement = document.querySelector('title');
+        return titleElement?.textContent?.trim() || '';
+      });
+      if (domTitle) {
+        return domTitle;
+      }
+
+      return this.#url;
+    } catch (error) {
+      return '';
+    }
+  }
+
   async #getFavicon() {
     if (this.url === 'about:blank' || this.url.startsWith('chrome://')) {
       return '';
     }
 
     try {
+      await delay(100);
       const favicon = await this.#pptrPage.evaluate(() => {
         const iconLink = document.querySelector(
           'link[rel*="icon"]',

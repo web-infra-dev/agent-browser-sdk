@@ -4,6 +4,15 @@
  */
 import { Protocol } from 'puppeteer-core';
 
+import type { UIBrowserOptions } from './model';
+
+export interface BrowserUIOptions {
+  /** Root element to mount the browser UI */
+  root: HTMLElement;
+  /** Browser connection options */
+  browserOptions: UIBrowserOptions;
+}
+
 export interface TabMeta {
   id: string;
   title: string;
