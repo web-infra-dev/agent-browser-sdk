@@ -7,7 +7,7 @@ import './view';
 import { BrowserContainer } from './view';
 import { getMacOSHotkey, isPasteHotkey } from './utils';
 
-import type { ConnectOptions, KeyInput } from 'puppeteer-core';
+import type { KeyInput } from 'puppeteer-core';
 import type {
   ClipboardDetail,
   KeyboardDetail,
@@ -17,13 +17,14 @@ import type {
   NavigationEventDetail,
   NavigationActionEventDetail,
   DialogAcceptEventDetail,
+  UIBrowserOptions,
 } from './types';
 
 export interface BrowserUIOptions {
   /** Root element to mount the browser UI */
   root: HTMLElement;
   /** Browser connection options */
-  browserOptions: ConnectOptions;
+  browserOptions: UIBrowserOptions;
 }
 
 export class BrowserUI {
@@ -55,7 +56,8 @@ export class BrowserUI {
     this.#browserContainer = document.createElement(
       'ai-browser-container',
     ) as BrowserContainer;
-    this.#browserContainer.defaultViewport = browserOptions.defaultViewport || {
+    this.#browserContainer.defaultViewport = browserOptions.connect
+      ?.defaultViewport || {
       width: 1280,
       height: 1024,
     };

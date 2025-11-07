@@ -2,25 +2,55 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  Tab,
-  Tabs,
-  type TabOptions,
-  type TabsOptions,
-} from '@agent-infra/browser/web';
+import { Tab, Tabs, type TabOptions } from '@agent-infra/browser/web';
 import { ScreencastRenderer } from './screencast-renderer';
 
 import type { Browser, Page } from 'puppeteer-core';
+import type { UITabOptions, UITabsOptions } from '../types';
+
+export class UITabs extends Tabs<UITab> {
+  #canvas: HTMLCanvasElement;
+  #options: UITabsOptions;
+
+  static async UICreate(
+    browser: Browser,
+    canvas: HTMLCanvasElement,
+    options: UITabsOptions,
+  ): Promise<UITabs> {
+    const tabs = new UITabs(browser, canvas, options);
+    await tabs.initializeExistingTabs();
+    return tabs;
+  }
+
+  constructor(
+    browser: Browser,
+    canvas: HTMLCanvasElement,
+    options: UITabsOptions,
+  ) {
+    super(browser, options);
+    this.#canvas = canvas;
+    this.#options = options;
+  }
+
+  override createTabInstance(page: Page, options: TabOptions): UITab {
+    const uiOptions: UITabOptions = {
+      ...options,
+      cast: this.#options.cast,
+    };
+    return new UITab(page, this.#canvas, uiOptions);
+  }
+}
 
 export class UITab extends Tab {
   #renderer: ScreencastRenderer;
 
-  constructor(page: Page, canvas: HTMLCanvasElement, options: TabOptions) {
+  constructor(page: Page, canvas: HTMLCanvasElement, options: UITabOptions) {
     super(page, options);
 
     this.#renderer = new ScreencastRenderer(page, canvas, {
       tabId: options.tabId,
       viewport: options.viewport,
+      cast: options.cast,
     });
   }
 
@@ -42,32 +72,5 @@ export class UITab extends Tab {
   override async _inactive() {
     super._inactive();
     this.#renderer.stop();
-  }
-}
-
-export class UITabs extends Tabs<UITab> {
-  #canvas: HTMLCanvasElement;
-
-  static async UICreate(
-    browser: Browser,
-    canvas: HTMLCanvasElement,
-    options: TabsOptions,
-  ): Promise<UITabs> {
-    const tabs = new UITabs(browser, canvas, options);
-    await tabs.initializeExistingTabs();
-    return tabs;
-  }
-
-  constructor(
-    browser: Browser,
-    canvas: HTMLCanvasElement,
-    options: TabsOptions,
-  ) {
-    super(browser, options);
-    this.#canvas = canvas;
-  }
-
-  override createTabInstance(page: Page, options: TabOptions): UITab {
-    return new UITab(page, this.#canvas, options);
   }
 }
