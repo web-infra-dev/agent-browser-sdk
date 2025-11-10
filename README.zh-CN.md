@@ -63,7 +63,7 @@ pnpm run build
 pnpm run test
 
 # 代码检查
-pnpm run lint
+pnpm run format
 ```
 
 <br />

@@ -63,7 +63,7 @@ pnpm run build
 pnpm run test
 
 # Lint code
-pnpm run lint
+pnpm run format
 ```
 
 <br />

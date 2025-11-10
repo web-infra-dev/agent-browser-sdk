@@ -46,7 +46,11 @@ export class Keyboard {
     const formattedHotkey = this.#formatHotkey(key);
 
     if (this.#env.osName === 'macOS' && this.#env.browserName === 'Chrome') {
-      const success = await this.#macOSCDPHotKey(formattedHotkey, options);
+      const success = await this.#macOSCDPHotKey(
+        formattedHotkey,
+        options,
+        true,
+      );
       if (success) {
         return { success: true };
       }
@@ -78,7 +82,11 @@ export class Keyboard {
     const formattedHotkey = this.#formatHotkey(key);
 
     if (this.#env.osName === 'macOS' && this.#env.browserName === 'Chrome') {
-      const success = await this.#macOSCDPHotKey(formattedHotkey, options);
+      const success = await this.#macOSCDPHotKey(
+        formattedHotkey,
+        options,
+        false,
+      );
       if (success) {
         return { success: true };
       }
@@ -163,6 +171,7 @@ export class Keyboard {
   async #macOSCDPHotKey(
     keys: KeyInput[],
     options: Readonly<KeyboardOptions>,
+    isPress: boolean,
   ): Promise<boolean> {
     const hotkey = keys
       .map((key) => {
@@ -180,7 +189,10 @@ export class Keyboard {
         commands: [command.commands],
       });
       await delay(options.delay ?? 0);
-      await this.#page.keyboard.up(command.key);
+
+      if (isPress) {
+        await this.#page.keyboard.up(command.key);
+      }
 
       return true;
     }

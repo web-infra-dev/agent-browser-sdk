@@ -29,8 +29,8 @@
   ],
   "scripts": {
     "prepublishOnly": "pnpm run build",
-    "build": "rslib build",
-    "dev": "tsx examples/boot.ts",
+    "build": "rslib build && rslib build --config rslib.config.bundle.ts",
+    "dev": "tsx examples/core/boot.ts",
     "test": "vitest run"
   },
   "dependencies": {
