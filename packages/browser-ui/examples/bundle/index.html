@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CanvasBrowser Demo</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="browserContainer">
+      <!-- Browser UI will be automatically mounted here -->
+    </div>
+
+    <script src="../dist/bundle/index.js"></script>
+    <script>
+      const container = document.getElementById('browserContainer');
+      if (!container) {
+        throw new Error('Browser container element not found');
+      }
+
+      const BrowserUI = window.agent_infra_browser_ui.BrowserUI;
+
+      BrowserUI.create({
+        root: container,
+        browserOptions: {
+          connect: {
+            // @ts-ignore
+            browserWSEndpoint: import.meta.WSEndpoint,
+            defaultViewport: {
+              width: 900,
+              height: 900,
+            },
+          },
+          searchEngine: 'baidu',
+        },
+      });
+    </script>
+  </body>
+</html>
