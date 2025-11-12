@@ -1,0 +1,84 @@
+{
+  "name": "@agent-infra/mcp-server-browser",
+  "version": "1.2.23",
+  "mcpName": "io.github.bytedance/mcp-server-browser",
+  "description": "MCP server for browser use access",
+  "license": "MIT",
+  "homepage": "https://github.com/bytedance/UI-TARS-desktop",
+  "bugs": "https://github.com/bytedance/UI-TARS-desktop/issues",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop.git",
+    "directory": "packages/agent-infra/mcp-servers/browser"
+  },
+  "bin": {
+    "mcp-server-browser": "dist/index.cjs"
+  },
+  "main": "dist/server.cjs",
+  "module": "dist/server.js",
+  "types": "dist/server.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs"
+    },
+    "./index": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./request-context": {
+      "import": "./dist/request-context.js",
+      "require": "./dist/request-context.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "shx rm -rf dist && rslib build && shx chmod +x dist/*.{js,cjs}",
+    "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
+    "dev:server": "tsx --watch src/index.ts --port 3000 --vision",
+    "dev:vision": "npx -y @modelcontextprotocol/inspector tsx src/index.ts --vision",
+    "prepare": "npm run build",
+    "prepublishOnly": "tsx scripts/update-readme.ts",
+    "test": "vitest run --config=./vitest.config.mts",
+    "test:bench": "vitest bench",
+    "watch": "rslib build --watch"
+  },
+  "dependencies": {
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@agent-infra/browser-context": "workspace:*",
+    "@modelcontextprotocol/sdk": "~1.15.1",
+    "@ui-tars/action-parser": "^1.2.3",
+    "mcp-http-server": "^1.2.4",
+    "puppeteer-core": "24.23.0"
+  },
+  "devDependencies": {
+    "@agent-infra/browser": "workspace:*",
+    "@agent-infra/browser-use": "0.1.6",
+    "@ghostery/adblocker-puppeteer": "2.5.2",
+    "@rslib/core": "0.10.0",
+    "@types/diff": "^5.0.9",
+    "@types/jsdom": "^21.1.7",
+    "@types/lodash.merge": "4.6.9",
+    "@types/mime-types": "^3.0.1",
+    "@types/minimatch": "^5.1.2",
+    "@types/node": "^22",
+    "commander": "^13.1.0",
+    "cross-fetch": "4.1.0",
+    "get-port": "^7.1.0",
+    "isbinaryfile": "^5.0.4",
+    "jimp": "^1.6.0",
+    "lodash.merge": "4.6.2",
+    "mcp-proxy": "^3.0.3",
+    "mime-types": "^3.0.1",
+    "sharp": "0.33.3",
+    "shx": "^0.3.4",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
+  }
+}
