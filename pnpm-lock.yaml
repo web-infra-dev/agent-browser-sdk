@@ -186,8 +186,8 @@ importers:
   packages/browser-ui:
     dependencies:
       '@agent-infra/browser':
-        specifier: workspace:*
-        version: link:../browser
+        specifier: 0.1.6
+        version: 0.1.6
       eventemitter3:
         specifier: 5.0.1
         version: 5.0.1
