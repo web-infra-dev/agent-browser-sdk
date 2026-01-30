@@ -17,7 +17,7 @@
   "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git@github.com:agent-infra/browser.git"
+    "url": "https://github.com/web-infra-dev/agent-browser-sdk.git"
   },
   "files": [
     "dist",
