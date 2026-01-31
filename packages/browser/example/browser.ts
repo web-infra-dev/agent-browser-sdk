@@ -6,7 +6,9 @@ import { Browser } from '../src/index.node';
 
 async function main() {
   const browser = await Browser.create({
-    headless: false,
+    launchOrConnect: {
+      headless: true,
+    },
   });
 
   const tab = browser.getActiveTab();
